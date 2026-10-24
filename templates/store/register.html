@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}Register — AMBERCAST{% endblock %}
+
+{% block content %}
+<div class="min-h-[80vh] flex items-center justify-center px-margin-mobile py-space-xl">
+  <div class="w-full max-w-xl bg-surface-container-lowest rounded-2xl shadow-xl p-space-lg md:p-space-xl border border-surface-container-high space-y-space-md">
+    <div class="text-center space-y-1">
+      <div class="w-12 h-12 rounded-full bg-primary-fixed text-on-primary-fixed border border-primary flex items-center justify-center font-serif font-bold text-lg mx-auto shadow-sm">
+        AC
+      </div>
+      <h1 class="font-headline-lg text-headline-lg text-on-surface font-serif mt-2">Create an Account</h1>
+      <p class="font-body-sm text-body-sm text-on-surface-variant">Register to browse and purchase artisanal brass sculptures, track orders, and save your wishlist.</p>
+    </div>
+
+    {% if form.errors %}
+      <div class="p-space-sm bg-error-container text-on-error-container rounded text-xs">
+        <ul class="list-disc pl-4 space-y-1">
+          {% for field, errors in form.errors.items %}
+            {% for err in errors %}
+              <li>{{ field|title }}: {{ err }}</li>
+            {% endfor %}
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <form method="POST" class="space-y-space-md">
+      {% csrf_token %}
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
+        <div>
+          <label class="block font-label-md text-label-md uppercase text-on-surface-variant font-semibold mb-1">First Name *</label>
+          {{ form.first_name }}
+        </div>
+        <div>
+          <label class="block font-label-md text-label-md uppercase text-on-surface-variant font-semibold mb-1">Last Name *</label>
+          {{ form.last_name }}
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
+        <div>
+          <label class="block font-label-md text-label-md uppercase text-on-surface-variant font-semibold mb-1">Email Address *</label>
+          {{ form.email }}
+        </div>
+        <div>
+          <label class="block font-label-md text-label-md uppercase text-on-surface-variant font-semibold mb-1">Contact Telephone *</label>
+          {{ form.phone }}
+        </div>
+      </div>
+
+      <div>
+        <label class="block font-label-md text-label-md uppercase text-on-surface-variant font-semibold mb-1">Delivery Address *</label>
+        {{ form.address }}
+      </div>
+
+      <div>
+        <label class="block font-label-md text-label-md uppercase text-on-surface-variant font-semibold mb-1">Account Type *</label>
+        {{ form.role }}
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
+        <div>
+          <label class="block font-label-md text-label-md uppercase text-on-surface-variant font-semibold mb-1">Password *</label>
+          {{ form.password }}
+        </div>
+        <div>
+          <label class="block font-label-md text-label-md uppercase text-on-surface-variant font-semibold mb-1">Confirm Password *</label>
+          {{ form.confirm_password }}
+        </div>
+      </div>
+
+      <button type="submit" class="w-full py-3.5 bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md uppercase font-bold tracking-wider rounded shadow-md transition-all">
+        Create Account
+      </button>
+    </form>
+
+    <div class="pt-space-sm border-t border-surface-container text-center text-xs text-on-surface-variant">
+      <span>Already have an account?</span>
+      <a href="{% url 'login' %}" class="text-primary font-bold hover:underline ml-1 uppercase font-label-sm">Sign In</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

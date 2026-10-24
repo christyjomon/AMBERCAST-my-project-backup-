@@ -1,0 +1,556 @@
+{% extends 'base.html' %}
+
+{% block title %}AMBERCAST — Curation Bag &amp; Vault Checkout{% endblock %}
+
+{% block content %}
+<div class="relative w-full overflow-hidden">
+  <div class="absolute -top-24 right-1/4 w-96 h-96 bg-primary-container/10 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="absolute top-96 left-10 w-80 h-80 bg-secondary-container/10 rounded-full blur-3xl pointer-events-none"></div>
+
+  <div class="max-w-7xl mx-auto px-margin-mobile md:px-margin-tablet lg:px-margin py-space-xl">
+    <!-- Breadcrumb & Step Indicator -->
+    <div class="flex flex-wrap items-center justify-between gap-space-md mb-space-lg">
+      <div class="flex items-center gap-space-sm text-on-surface-variant font-label-md text-label-md uppercase tracking-wider">
+        <a href="{% url 'home' %}" class="hover:text-primary transition-colors">Foundry Atelier</a>
+        <span class="text-outline-variant">/</span>
+        <span class="hover:text-primary transition-colors">Curation Bag</span>
+        <span class="text-outline-variant">/</span>
+        <span class="text-primary font-semibold">Vault Checkout</span>
+      </div>
+      <div class="flex items-center gap-space-md bg-surface-container px-space-md py-space-xs rounded-full shadow-sm border border-surface-container-high">
+        <div class="flex items-center gap-1.5 font-label-sm text-label-sm uppercase text-primary font-semibold">
+          <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+          Cart Ledger: {% if cart %}#AC-{{ cart.id }}-FL{% else %}#AC-EMPTY{% endif %}
+        </div>
+        <span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+        <span class="font-label-sm text-label-sm uppercase text-on-surface-variant">Live Reservation (Active)</span>
+      </div>
+    </div>
+
+    <!-- Main Asymmetric Flow Layout -->
+    <form method="POST" action="{% url 'checkout' %}" id="checkout-form">
+      {% csrf_token %}
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-start">
+        <!-- Left Column: Cart Inventory & Details & Checkout Forms (7 Cols) -->
+        <div class="lg:col-span-7 flex flex-col gap-space-xl">
+          <!-- Atelier Items Table Card -->
+          <div class="bg-surface-container-lowest rounded-xl shadow-md p-space-md md:p-space-lg flex flex-col border border-surface-container-high">
+            <div class="flex items-center justify-between pb-space-md border-b border-surface-container">
+              <div class="flex flex-col">
+                <span class="font-label-sm text-label-sm uppercase tracking-widest text-primary font-semibold">Atelier Parcel Verification</span>
+                <h2 class="font-headline-sm text-headline-sm text-on-surface">Inspected Foundry Artifacts</h2>
+              </div>
+              <span class="font-label-md text-label-md bg-surface-container-high text-on-surface px-space-md py-1 rounded-full font-semibold" id="cart-item-count">
+                {{ cart.total_items|default:0 }} {% if cart.total_items == 1 %}Heirloom{% else %}Heirlooms{% endif %}
+              </span>
+            </div>
+
+            <!-- Items Container -->
+            <div class="flex flex-col gap-space-md pt-space-md" id="cart-item-list">
+              {% for item in cart_items %}
+              <div class="cart-item group relative bg-surface-container-low hover:bg-surface-container transition-all duration-300 rounded-lg p-space-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-space-md border border-surface-container-high" id="cart-item-row-{{ item.id }}">
+                <div class="flex items-center gap-space-md">
+                  <div class="relative w-20 h-20 rounded-md overflow-hidden bg-surface-container-highest shrink-0 shadow-sm">
+                    <img class="w-full h-full object-cover" alt="{{ item.product.product_name }}" src="{{ item.product.primary_image_url }}">
+                    <span class="absolute bottom-1 left-1 bg-inverse-surface/80 backdrop-blur-md text-inverse-on-surface font-label-sm text-label-sm px-1 rounded text-[9px]">
+                      {{ item.product.weight|default:"Solid Brass" }}
+                    </span>
+                  </div>
+                  <div class="flex flex-col min-w-0">
+                    <span class="font-label-sm text-label-sm uppercase tracking-widest text-secondary font-semibold">{{ item.product.category }}</span>
+                    <h3 class="font-headline-sm text-headline-sm text-on-surface text-lg md:text-xl truncate">
+                      <a href="{% url 'product_detail' item.product.id %}" class="hover:text-primary">{{ item.product.product_name }}</a>
+                    </h3>
+                    <div class="flex items-center gap-2 mt-0.5 font-label-md text-label-md text-on-surface-variant">
+                      <span>Ref: {{ item.product.sku }}</span>
+                      <span class="text-outline-variant">•</span>
+                      <span>{{ item.product.alloy_blend }}</span>
+                    </div>
+                    <div class="sm:hidden font-headline-sm text-headline-sm text-primary mt-1">₹{{ item.product.price }}</div>
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-space-lg pt-2 sm:pt-0">
+                  <div class="hidden sm:flex flex-col items-end">
+                    <span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Unit Value</span>
+                    <span class="font-headline-sm text-headline-sm text-on-surface text-lg">₹{{ item.product.price }}</span>
+                  </div>
+
+                  <!-- Counter -->
+                  <div class="flex items-center bg-surface-container-lowest rounded-full p-1 shadow-sm border border-surface-container-high">
+                    <button type="button" aria-label="Decrease quantity" class="qty-btn w-7 h-7 rounded-full bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-on-surface transition-colors focus:outline-none" data-id="{{ item.id }}" data-delta="-1">
+                      <span class="material-symbols-outlined text-sm">remove</span>
+                    </button>
+                    <span class="w-8 text-center font-label-md text-label-md font-semibold text-on-surface" id="qty-val-{{ item.id }}">{{ item.quantity }}</span>
+                    <button type="button" aria-label="Increase quantity" class="qty-btn w-7 h-7 rounded-full bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-on-surface transition-colors focus:outline-none" data-id="{{ item.id }}" data-delta="1">
+                      <span class="material-symbols-outlined text-sm">add</span>
+                    </button>
+                  </div>
+
+                  <!-- Item Subtotal -->
+                  <div class="flex flex-col items-end min-w-[70px]">
+                    <span class="font-label-sm text-label-sm text-on-surface-variant uppercase hidden sm:block">Total</span>
+                    <span class="font-headline-sm text-headline-sm text-primary text-xl font-bold" id="subtotal-val-{{ item.id }}">₹{{ item.subtotal }}</span>
+                  </div>
+
+                  <!-- Remove Button -->
+                  <a href="{% url 'remove_from_cart' item.id %}" class="p-2 text-on-surface-variant hover:text-error hover:bg-error-container/20 rounded-full transition-colors" title="Remove Artifact">
+                    <span class="material-symbols-outlined text-lg">delete</span>
+                  </a>
+                </div>
+              </div>
+              {% empty %}
+              <!-- Empty Cart State Banner -->
+              <div class="flex flex-col items-center justify-center py-space-xl text-center">
+                <span class="material-symbols-outlined text-5xl text-outline-variant mb-2">shopping_bag</span>
+                <p class="font-headline-sm text-headline-sm text-on-surface">Your Atelier Curation is Empty</p>
+                <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Explore our sand-cast heritage collection to commission fine works.</p>
+                <a href="{% url 'catalog' %}" class="mt-4 px-4 py-2 bg-primary text-on-primary rounded font-label-md text-label-md uppercase font-semibold">
+                  Browse Catalog
+                </a>
+              </div>
+              {% endfor %}
+            </div>
+
+            <!-- Atelier Assurance Footer Ribbon -->
+            <div class="mt-space-md pt-space-md bg-surface-container-high/40 rounded-lg p-space-sm flex flex-wrap items-center justify-between gap-space-sm text-on-surface-variant font-label-sm text-label-sm uppercase border border-surface-container-high">
+              <div class="flex items-center gap-1.5 text-primary font-semibold">
+                <span class="material-symbols-outlined text-base">verified</span>
+                <span>Foundry Stamped Authenticity</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-base text-secondary">handyman</span>
+                <span>Wax Seal Tamper Inspection</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-base text-on-surface">history_edu</span>
+                <span>Lifetime Provenance Ledger</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2: Shipping Destination & Beneficiary -->
+          <div class="bg-surface-container-lowest rounded-xl shadow-md p-space-md md:p-space-lg flex flex-col gap-space-md border border-surface-container-high">
+            <div class="flex items-center justify-between">
+              <div class="flex flex-col">
+                <span class="font-label-sm text-label-sm uppercase tracking-widest text-secondary font-semibold">Courier Dispatch Registry</span>
+                <h2 class="font-headline-sm text-headline-sm text-on-surface">Recipient &amp; Delivery Destination</h2>
+              </div>
+              <span class="material-symbols-outlined text-primary text-2xl">local_shipping</span>
+            </div>
+
+            <!-- Saved Addresses Selector -->
+            <div class="flex flex-col gap-2">
+              <label class="font-label-md text-label-md text-on-surface-variant uppercase font-semibold">Quick-Select Stored Dossier Address</label>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
+                <!-- Address Card 1 (Active) -->
+                <label class="relative flex flex-col p-space-md rounded-lg bg-surface-container-low cursor-pointer hover:bg-surface-container transition-all border border-surface-container-high">
+                  <input checked class="sr-only peer" name="saved_address" onchange="populateSavedAddress('primary')" type="radio" value="primary">
+                  <div class="flex items-center justify-between">
+                    <span class="font-label-sm text-label-sm uppercase bg-primary text-on-primary px-2 py-0.5 rounded-full font-semibold">Primary Residence</span>
+                    <span class="material-symbols-outlined text-primary opacity-0 peer-checked:opacity-100 transition-opacity">check_circle</span>
+                  </div>
+                  <div class="mt-2 font-body-md text-body-md text-on-surface font-semibold">{{ user.first_name|default:"Devraj" }} {{ user.last_name|default:"Sengupta" }}</div>
+                  <div class="font-body-sm text-body-sm text-on-surface-variant mt-0.5 leading-snug">
+                    {{ user.address|default:"42/A Heritage Estate, Malabar Hill, Mumbai, MH 400006, India" }}
+                  </div>
+                  <div class="font-label-sm text-label-sm text-primary mt-2 font-mono">{{ user.phone|default:"+91 98201 44921" }}</div>
+                  <div class="absolute inset-0 rounded-lg pointer-events-none peer-checked:ring-2 peer-checked:ring-primary/40"></div>
+                </label>
+
+                <!-- Address Card 2 -->
+                <label class="relative flex flex-col p-space-md rounded-lg bg-surface-container-low cursor-pointer hover:bg-surface-container transition-all border border-surface-container-high">
+                  <input class="sr-only peer" name="saved_address" onchange="populateSavedAddress('atelier')" type="radio" value="atelier">
+                  <div class="flex items-center justify-between">
+                    <span class="font-label-sm text-label-sm uppercase bg-surface-container-highest text-on-surface-variant px-2 py-0.5 rounded-full font-semibold">Design Studio</span>
+                    <span class="material-symbols-outlined text-primary opacity-0 peer-checked:opacity-100 transition-opacity">check_circle</span>
+                  </div>
+                  <div class="mt-2 font-body-md text-body-md text-on-surface font-semibold">{{ user.first_name|default:"Devraj" }} {{ user.last_name|default:"Sengupta" }}</div>
+                  <div class="font-body-sm text-body-sm text-on-surface-variant mt-0.5 leading-snug">
+                    Penthouse 7, The Oberoi Chambers, Nariman Point, Mumbai 400021, India
+                  </div>
+                  <div class="font-label-sm text-label-sm text-primary mt-2 font-mono">+91 98201 88910</div>
+                  <div class="absolute inset-0 rounded-lg pointer-events-none peer-checked:ring-2 peer-checked:ring-primary/40"></div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Explicit Form: first_name, last_name, phone, shipping_address, delivery_notes -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md pt-2">
+              <div class="flex flex-col gap-1">
+                <label class="font-label-md text-label-md uppercase text-on-surface-variant font-semibold" for="first_name">First Name *</label>
+                <input class="w-full bg-surface-container-low focus:bg-surface-container-lowest text-on-surface px-space-md py-space-sm rounded font-body-md text-body-md outline-none transition-all shadow-sm border border-surface-container-high focus:border-primary" id="first_name" name="first_name" required type="text" value="{{ user.first_name|default:'Devraj' }}">
+              </div>
+              <div class="flex flex-col gap-1">
+                <label class="font-label-md text-label-md uppercase text-on-surface-variant font-semibold" for="last_name">Last Name *</label>
+                <input class="w-full bg-surface-container-low focus:bg-surface-container-lowest text-on-surface px-space-md py-space-sm rounded font-body-md text-body-md outline-none transition-all shadow-sm border border-surface-container-high focus:border-primary" id="last_name" name="last_name" required type="text" value="{{ user.last_name|default:'Sengupta' }}">
+              </div>
+              <div class="flex flex-col gap-1 sm:col-span-2">
+                <label class="font-label-md text-label-md uppercase text-on-surface-variant font-semibold" for="phone">Contact Telephone (Dispatch SMS &amp; Verification) *</label>
+                <div class="relative flex items-center">
+                  <span class="absolute left-space-md font-label-md text-label-md text-on-surface-variant font-mono">+91</span>
+                  <input class="w-full pl-14 bg-surface-container-low focus:bg-surface-container-lowest text-on-surface pr-space-md py-space-sm rounded font-body-md text-body-md outline-none transition-all shadow-sm border border-surface-container-high focus:border-primary" id="phone" name="phone" required type="tel" value="{{ user.phone|default:'98201 44921' }}">
+                </div>
+              </div>
+              <div class="flex flex-col gap-1 sm:col-span-2">
+                <label class="font-label-md text-label-md uppercase text-on-surface-variant font-semibold" for="shipping_address">Artisan Courier Delivery Address *</label>
+                <textarea class="w-full bg-surface-container-low focus:bg-surface-container-lowest text-on-surface p-space-md rounded font-body-md text-body-md outline-none transition-all shadow-sm border border-surface-container-high focus:border-primary resize-none" id="shipping_address" name="shipping_address" required rows="3">{{ user.address|default:'42/A Heritage Estate, Malabar Hill, Mumbai, MH 400006, India' }}</textarea>
+              </div>
+              <div class="flex flex-col gap-1 sm:col-span-2">
+                <label class="font-label-md text-label-md uppercase text-on-surface-variant font-semibold" for="delivery_notes">Foundry Handling Directives (Optional)</label>
+                <input class="w-full bg-surface-container-low focus:bg-surface-container-lowest text-on-surface px-space-md py-space-sm rounded font-body-md text-body-md outline-none transition-all shadow-sm border border-surface-container-high focus:border-primary" id="delivery_notes" name="delivery_notes" placeholder="e.g. Leave with private concierge; requires two-person lift" type="text">
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 3: Payment Method Selector -->
+          <div class="bg-surface-container-lowest rounded-xl shadow-md p-space-md md:p-space-lg flex flex-col gap-space-md border border-surface-container-high">
+            <div class="flex items-center justify-between">
+              <div class="flex flex-col">
+                <span class="font-label-sm text-label-sm uppercase tracking-widest text-primary font-semibold">Treasury Settlement</span>
+                <h2 class="font-headline-sm text-headline-sm text-on-surface">Payment Method Selection</h2>
+              </div>
+              <div class="flex items-center gap-1 font-label-sm text-label-sm bg-surface-container text-on-surface-variant px-space-sm py-1 rounded">
+                <span class="material-symbols-outlined text-sm text-primary">encrypted</span>
+                <span>PCI-DSS Tier 1 Encrypted</span>
+              </div>
+            </div>
+
+            <!-- Radio Options for COD & Online Payment -->
+            <div class="flex flex-col gap-space-sm">
+              <!-- Online Payment Option (Selected) -->
+              <div class="p-space-md bg-surface-container-low rounded-lg transition-all flex flex-col gap-space-sm border border-surface-container-high">
+                <label class="flex items-start justify-between cursor-pointer">
+                  <div class="flex items-center gap-space-sm">
+                    <input checked class="w-4 h-4 text-primary accent-primary" id="pay_online" name="payment_method" onchange="togglePaymentType('online')" type="radio" value="online">
+                    <div class="flex flex-col">
+                      <div class="flex items-center gap-space-xs">
+                        <span class="font-headline-sm text-headline-sm text-base md:text-lg text-on-surface">Digital Payment (UPI, Credit/Debit, Net Banking)</span>
+                        <span class="font-label-sm text-label-sm bg-primary/10 text-primary px-2 py-0.5 rounded uppercase font-semibold">Instant Guarantee</span>
+                      </div>
+                      <span class="font-body-sm text-body-sm text-on-surface-variant">Direct bank escrow, instant allocation from casting vault</span>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-1 text-on-surface-variant">
+                    <span class="material-symbols-outlined text-lg">credit_card</span>
+                    <span class="material-symbols-outlined text-lg">account_balance</span>
+                    <span class="material-symbols-outlined text-lg">qr_code_2</span>
+                  </div>
+                </label>
+
+                <!-- Sub-options for Online Payment -->
+                <div class="ml-6 pt-2 flex flex-col gap-space-sm" id="online_suboptions">
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-space-xs font-label-md text-label-md">
+                    <label class="flex items-center gap-2 p-space-sm bg-surface-container-lowest rounded cursor-pointer hover:bg-surface-bright transition-colors border border-surface-container">
+                      <input checked class="accent-primary" name="online_instrument" type="radio" value="upi">
+                      <span class="font-semibold text-on-surface">Instant UPI / QR</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-space-sm bg-surface-container-lowest rounded cursor-pointer hover:bg-surface-bright transition-colors border border-surface-container">
+                      <input class="accent-primary" name="online_instrument" type="radio" value="card">
+                      <span class="font-semibold text-on-surface">Visa / Mastercard / Amex</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-space-sm bg-surface-container-lowest rounded cursor-pointer hover:bg-surface-bright transition-colors border border-surface-container">
+                      <input class="accent-primary" name="online_instrument" type="radio" value="netbanking">
+                      <span class="font-semibold text-on-surface">Vault Net Banking</span>
+                    </label>
+                  </div>
+                  <div class="flex items-center justify-between bg-surface-container-high/60 px-space-md py-2 rounded">
+                    <div class="flex items-center gap-2">
+                      <span class="w-2.5 h-2.5 rounded-full bg-primary animate-ping"></span>
+                      <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface font-semibold">Live Gateway: Razorpay Sovereign Multi-Currency</span>
+                    </div>
+                    <div class="flex items-center gap-1 text-primary font-label-sm text-label-sm font-semibold uppercase">
+                      <span class="material-symbols-outlined text-sm">security_update_good</span>
+                      <span>payment_status: Awaiting Authorization</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Cash On Delivery (COD) Option -->
+              <div class="p-space-md bg-surface-container-low rounded-lg transition-all flex flex-col gap-space-sm border border-surface-container-high">
+                <label class="flex items-start justify-between cursor-pointer">
+                  <div class="flex items-center gap-space-sm">
+                    <input class="w-4 h-4 text-primary accent-primary" id="pay_cod" name="payment_method" onchange="togglePaymentType('cod')" type="radio" value="cod">
+                    <div class="flex flex-col">
+                      <div class="flex items-center gap-space-xs">
+                        <span class="font-headline-sm text-headline-sm text-base md:text-lg text-on-surface">Cash On Delivery (COD)</span>
+                        <span class="font-label-sm text-label-sm bg-surface-container-highest text-on-surface-variant px-2 py-0.5 rounded uppercase font-semibold">Physical Settlement</span>
+                      </div>
+                      <span class="font-body-sm text-body-sm text-on-surface-variant">Pay via certified courier upon receiving and unsealing crate</span>
+                    </div>
+                  </div>
+                  <span class="material-symbols-outlined text-on-surface-variant text-lg">payments</span>
+                </label>
+
+                <!-- COD Details block -->
+                <div class="hidden ml-6 pt-2 flex-col gap-1" id="cod_details">
+                  <div class="bg-surface-container-lowest p-space-sm rounded font-body-sm text-body-sm text-on-surface-variant border border-surface-container">
+                    Please prepare exact cash or instant UPI scan upon arrival of the AmberCast white-glove team. Courier will unbox for hallmark inspection before receipt.
+                  </div>
+                  <div class="flex items-center gap-1 text-secondary font-label-sm text-label-sm font-semibold uppercase mt-1">
+                    <span class="material-symbols-outlined text-sm">pending_actions</span>
+                    <span>payment_status: Pending Cash On Delivery Delivery</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Sticky Sovereign Order Summary (5 Cols) -->
+        <div class="lg:col-span-5 flex flex-col gap-space-lg lg:sticky lg:top-28">
+          <!-- Order Summary Card -->
+          <div class="bg-surface-container-lowest rounded-xl shadow-xl p-space-lg flex flex-col relative overflow-hidden border border-surface-container-high">
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary-container via-primary to-secondary"></div>
+            
+            <div class="flex items-center justify-between pb-space-md border-b border-surface-container">
+              <div class="flex flex-col">
+                <span class="font-label-sm text-label-sm uppercase tracking-widest text-primary font-semibold">Ledger Calculation</span>
+                <h3 class="font-headline-md text-headline-md text-on-surface">Order Summary</h3>
+              </div>
+              <span class="font-label-sm text-label-sm bg-surface-container px-2 py-1 rounded text-on-surface-variant font-mono uppercase font-bold" id="summary-items-count">
+                {{ cart.total_items|default:0 }} ITEMS
+              </span>
+            </div>
+
+            <!-- Calculation Breakdown -->
+            <div class="flex flex-col gap-space-sm py-space-sm font-body-md text-body-md">
+              <div class="flex items-center justify-between text-on-surface">
+                <span class="text-on-surface-variant">Subtotal</span>
+                <span class="font-headline-sm text-headline-sm font-bold text-on-surface" id="summary-subtotal">₹{{ cart.total_amount|default:"0.00" }}</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-1">
+                  <span class="text-on-surface-variant">Insured Packaging</span>
+                  <span class="material-symbols-outlined text-xs text-primary" title="Handcrafted pine wooden crate with shock-absorbent velvet foam">info</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-on-surface-variant line-through text-xs font-mono">₹450.00</span>
+                  <span class="font-label-sm text-label-sm text-primary font-bold uppercase bg-primary-fixed-dim/40 px-2 py-0.5 rounded">Complimentary</span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between text-on-surface">
+                <span class="text-on-surface-variant">Shipping &amp; Delivery</span>
+                <span class="font-label-sm text-label-sm text-secondary uppercase font-bold">Free Shipping</span>
+              </div>
+              <div class="flex items-center justify-between text-on-surface">
+                <div class="flex items-center gap-1">
+                  <span class="text-on-surface-variant">GST (3%)</span>
+                  <span class="font-label-sm text-label-sm text-outline-variant font-mono">[HSN 7419]</span>
+                </div>
+                <span class="font-label-lg text-label-lg font-mono text-on-surface" id="summary-tax">₹{{ cart.tax_amount|default:"0.00" }}</span>
+              </div>
+            </div>
+
+            <!-- Promo/Patron Voucher Code -->
+            <div class="py-space-sm border-t border-surface-container">
+              <div class="flex items-center gap-space-xs">
+                <input class="w-full bg-surface-container-low focus:bg-surface-container text-on-surface px-space-md py-2 rounded font-body-sm text-body-sm outline-none uppercase font-mono tracking-wider border border-surface-container-high" id="voucher-code" name="voucher_code" placeholder="Enter Token: AMBER10" type="text">
+                <button class="bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label-sm text-label-sm uppercase px-space-md py-2.5 rounded shrink-0 font-semibold transition-colors" onclick="applyPatronDiscount()" type="button">
+                  Apply
+                </button>
+              </div>
+              <span class="hidden font-label-sm text-label-sm text-primary mt-1" id="voucher-msg">Guild Token AMBER10 applied (-10% patron privilege).</span>
+            </div>
+
+            <!-- Grand Total Container -->
+            <div class="bg-surface-container-low rounded-lg p-space-md my-space-sm flex flex-col gap-1 border border-surface-container-high">
+              <div class="flex items-baseline justify-between">
+                <div class="flex flex-col">
+                  <span class="font-label-sm text-label-sm uppercase tracking-widest text-secondary font-bold">Total Amount Payable</span>
+                  <span class="font-label-sm text-label-sm text-on-surface-variant font-mono">Inclusive of all taxes</span>
+                </div>
+                <div class="text-right">
+                  <span class="font-display-hero text-headline-lg md:text-display-hero text-primary font-bold tracking-tight" id="summary-grand-total">₹{{ cart.grand_total|default:"0.00" }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- CTA: Place Order -->
+            <div class="pt-space-sm flex flex-col gap-space-sm">
+              <button class="relative group overflow-hidden w-full bg-primary hover:bg-primary-container text-on-primary py-4 px-space-lg rounded font-label-lg text-label-lg uppercase tracking-widest font-bold shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-space-md {% if not cart or not cart.items.exists %}opacity-50 cursor-not-allowed{% endif %}" id="place-order-button" {% if not cart or not cart.items.exists %}disabled{% endif %} type="submit">
+                <span class="material-symbols-outlined text-xl transition-transform group-hover:scale-110">shield_lock</span>
+                <span>Place Order • Secure Allocation</span>
+                <span class="material-symbols-outlined text-xl transition-transform group-hover:translate-x-1">arrow_forward</span>
+              </button>
+              <p class="font-body-sm text-body-sm text-center text-on-surface-variant text-xs">
+                By sealing this reservation, you accept the AmberCast Foundry Terms of Guarantee &amp; Certificate Registry.
+              </p>
+            </div>
+
+            <!-- Guaranteed Safe Delivery Badge Component -->
+            <div class="mt-space-md pt-space-md bg-surface-container-high/40 rounded-lg p-space-md flex items-start gap-space-md border border-surface-container-high">
+              <div class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-2xl">verified_user</span>
+              </div>
+              <div class="flex flex-col">
+                <h4 class="font-headline-sm text-headline-sm text-base text-on-surface">Guaranteed Safe Vault Delivery</h4>
+                <p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5 leading-relaxed">
+                  Every sculpture is packed in high-density customized cedar/foam dampeners and insured at 100% replacement value. Zero-transit damage pledge backed by instant foundry recast.
+                </p>
+              </div>
+            </div>
+
+            <!-- Metallurgical Spec Preview Card -->
+            <div class="mt-space-md p-space-md bg-surface-container rounded-lg flex flex-col gap-2 border border-surface-container-high">
+              <div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm uppercase">
+                <span class="font-semibold text-on-surface">Consolidated Lot Mass</span>
+                <span class="font-mono text-primary font-bold">11.00 KG (Solid Brass)</span>
+              </div>
+              <div class="w-full bg-surface-container-highest h-1.5 rounded-full overflow-hidden">
+                <div class="bg-primary h-full rounded-full" style="width: 78%"></div>
+              </div>
+              <div class="flex items-center justify-between text-xs text-on-surface-variant font-label-sm text-label-sm">
+                <span>Casting Verification: Approved</span>
+                <span>Foundry Monogram: #AMBR-MUMBAI</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Collector's Concierge Card -->
+          <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-md flex items-center justify-between border border-surface-container-high">
+            <div class="flex items-center gap-space-md">
+              <span class="material-symbols-outlined text-secondary text-3xl">support_agent</span>
+              <div class="flex flex-col">
+                <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface font-semibold">Bespoke Inquiries?</span>
+                <span class="font-body-sm text-body-sm text-on-surface-variant">Speak directly with Head Foundry Master</span>
+              </div>
+            </div>
+            <a class="font-label-md text-label-md uppercase text-primary font-bold bg-surface-container px-3 py-1.5 rounded hover:bg-surface-container-high transition-colors" href="tel:+919820011223">
+              Direct Line
+            </a>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  let currentDiscount = 0;
+
+  function togglePaymentType(type) {
+    const onlineSubs = document.getElementById('online_suboptions');
+    const codDetails = document.getElementById('cod_details');
+
+    if (type === 'online') {
+      if (onlineSubs) onlineSubs.classList.remove('hidden');
+      if (codDetails) codDetails.classList.add('hidden');
+    } else {
+      if (onlineSubs) onlineSubs.classList.add('hidden');
+      if (codDetails) codDetails.classList.remove('hidden');
+      if (codDetails) codDetails.classList.add('flex');
+    }
+  }
+
+  function populateSavedAddress(profile) {
+    const firstNameInput = document.getElementById('first_name');
+    const lastNameInput = document.getElementById('last_name');
+    const phoneInput = document.getElementById('phone');
+    const addressInput = document.getElementById('shipping_address');
+
+    if (profile === 'primary') {
+      if (firstNameInput) firstNameInput.value = 'Devraj';
+      if (lastNameInput) lastNameInput.value = 'Sengupta';
+      if (phoneInput) phoneInput.value = '98201 44921';
+      if (addressInput) addressInput.value = '42/A Heritage Estate, Malabar Hill, Mumbai, MH 400006, India';
+    } else if (profile === 'atelier') {
+      if (firstNameInput) firstNameInput.value = 'Devraj';
+      if (lastNameInput) lastNameInput.value = 'Sengupta';
+      if (phoneInput) phoneInput.value = '98201 88910';
+      if (addressInput) addressInput.value = 'Penthouse 7, The Oberoi Chambers, Nariman Point, Mumbai 400021, India';
+    }
+  }
+
+  function updateItemQuantity(itemId, delta) {
+    const formData = new FormData();
+    formData.append('delta', delta);
+    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+    fetch(`/cart/update/${itemId}/`, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.status === 'success') {
+        const qtyEl = document.getElementById(`qty-val-${itemId}`);
+        const subEl = document.getElementById(`subtotal-val-${itemId}`);
+        const rowEl = document.getElementById(`cart-item-row-${itemId}`);
+
+        if (data.item_qty <= 0) {
+          if (rowEl) rowEl.remove();
+        } else {
+          if (qtyEl) qtyEl.innerText = data.item_qty;
+          if (subEl) subEl.innerText = `₹${data.item_subtotal.toFixed(2)}`;
+        }
+
+        // Global counters
+        const badge = document.getElementById('global-cart-badge');
+        if (badge) badge.innerText = data.cart_count;
+        const itemCount = document.getElementById('cart-item-count');
+        if (itemCount) itemCount.innerText = `${data.cart_count} ${data.cart_count === 1 ? 'Item' : 'Items'}`;
+        const summaryCount = document.getElementById('summary-items-count');
+        if (summaryCount) summaryCount.innerText = `${data.cart_count} ITEMS`;
+
+        // Update Summary
+        let subtotal = data.cart_subtotal;
+        let discount = subtotal * currentDiscount;
+        let discountedSubtotal = subtotal - discount;
+        let tax = discountedSubtotal * 0.03;
+        let grandTotal = discountedSubtotal + tax;
+
+        document.getElementById('summary-subtotal').innerText = `₹${subtotal.toFixed(2)}`;
+        document.getElementById('summary-tax').innerText = `₹${tax.toFixed(2)}`;
+        document.getElementById('summary-grand-total').innerText = `₹${grandTotal.toFixed(2)}`;
+
+        if (data.cart_count === 0) {
+          const btn = document.getElementById('place-order-button');
+          if (btn) {
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+          }
+        }
+      }
+    });
+  }
+
+  function applyPatronDiscount() {
+    const input = document.getElementById('voucher-code');
+    const msg = document.getElementById('voucher-msg');
+    if (input && input.value.trim().toUpperCase() === 'AMBER10') {
+      currentDiscount = 0.10;
+      if (msg) msg.classList.remove('hidden');
+
+      const rawSub = parseFloat(document.getElementById('summary-subtotal').innerText.replace(/[₹$,]/g, '')) || 0;
+      let discount = rawSub * currentDiscount;
+      let discountedSubtotal = rawSub - discount;
+      let tax = discountedSubtotal * 0.03;
+      let grandTotal = discountedSubtotal + tax;
+
+      document.getElementById('summary-tax').innerText = `₹${tax.toFixed(2)}`;
+      document.getElementById('summary-grand-total').innerText = `₹${grandTotal.toFixed(2)}`;
+      alert('Promo Code Applied: 10% Discount Applied.');
+    } else {
+      alert('Invalid Promo Code. Try code: "AMBER10"');
+    }
+  }
+
+
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.qty-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const itemId = this.dataset.id;
+        const delta = parseInt(this.dataset.delta, 10);
+        updateItemQuantity(itemId, delta);
+      });
+    });
+  });
+</script>
+{% endblock %}

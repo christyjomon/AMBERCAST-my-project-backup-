@@ -1,0 +1,329 @@
+==============================================================================
+AMBER CAST — SOFTWARE REQUIREMENTS SPECIFICATION (SRS) & SYSTEM DESIGN
+==============================================================================
+PROJECT TITLE   : AMBER CAST (Handcrafted Artisanal Brass & Metalcraft Atelier)
+TECHNOLOGY      : Python 3.x, Django 6.x, SQLite/MySQL, HTML5, Vanilla CSS / Tailwind Design Tokens, JavaScript
+VERSION         : 1.0.0
+AUTHOR          : Christy Jomon
+INSTITUTION REF : 26PMC121
+==============================================================================
+
+1. INTRODUCTION
+------------------------------------------------------------------------------
+1.1 Purpose
+The purpose of this Software Requirements Specification (SRS) is to define the 
+functional and non-functional requirements of the Amber Cast (Handcrafted BrassCraft) 
+Online Atelier Website, developed using Python Django.
+The system is designed to provide a luxury online platform where collectors and 
+patrons can browse, search, inspect, and purchase handcrafted brass metal products 
+such as sacred deity idols (Nataraja, Ganesha, Krishna, Saraswati), traditional 
+oil lamps (Kuthu Vilakku, Gaja Lakshmi Diya), temple hanging bells, bell-metal 
+urulis, and architectural fittings.
+
+1.2 Document Conventions
+- SRS   : Software Requirements Specification
+- Admin : Store & Foundry Workshop Administrator (Atelier Guildmaster)
+- Patron/User : Registered Customer or Collector
+- System : Amber Cast Web Application
+- Ingot/Product : Handcrafted solid brass metal items forged via Cire-Perdue (Lost-Wax)
+- COD   : Cash On Delivery physical settlement upon unboxing inspection
+- Online Payment : Instant electronic escrow / digital gateway settlement
+
+1.3 Intended Audience
+- Project Managers
+- Full-Stack Developers & System Architects
+- Quality Assurance / Testers
+- Database Administrators
+- Artisanal Foundry Administrators & Curators
+
+1.4 Project Scope
+The Amber Cast system is a full-featured web-based e-commerce and workshop 
+governance application built on Django's Model-View-Template (MVT) architecture.
+The platform enables customers to:
+- Browse collections filtered by category, mass (weight), surface patina, and price
+- Conduct multi-field searches across product titles, descriptions, and alloys
+- Inspect metallurgical spec sheets (composition, weight, dimensions, technique, provenance)
+- Add artworks to an active session curation bag
+- Place orders through Cash on Delivery (COD) or simulated online escrow
+- Receive serialized Commission Certificates with verifiable order references
+- Write and view authentic collector reviews with star ratings
+
+The administrator / workshop console allows the guild to:
+- Monitor gross revenue, active commissions, critical stock alerts, and patron metrics
+- Inspect and update the master Ingot Inventory table with real-time "+5 Smelt" restock
+- Progress order fulfillment stages (Processing -> Shipped -> Delivered)
+- Mint new brass casting products into the catalog with live preview
+- Track furnace smelting telemetry and material reserves
+
+1.5 References
+- IEEE 830-1998 Recommended Practice for Software Requirements Specifications
+- Python 3 Documentation
+- Django Framework 5.x / 6.x Documentation
+- Shilpa Shastras Canonical Iconometry Reference
+- W3C Web Content Accessibility Guidelines (WCAG 2.1)
+
+==============================================================================
+2. OVERALL DESCRIPTION
+==============================================================================
+2.1 Product Perspective
+Amber Cast operates as an autonomous, self-contained Django web application.
+It integrates relational database persistence (SQLite for local development, 
+readily upgradable to PostgreSQL/MySQL in production), dynamic template rendering, 
+and responsive Tailwind design system tokens mimicking burnished brass, raw amber, 
+and warm parchment.
+
+2.2 Core Product Features
+1. User Management (Registration, Authentication, Profile & Address Book)
+2. Product Catalog & Multi-Attribute Search & Filter
+3. Metallurgical Spec Sheet & Inspection Flyout Drawer
+4. Shopping Cart & Quantity Counter Synchronization
+5. Two-Tier Checkout (Digital Escrow vs Cash On Delivery)
+6. Automated Stock & Inventory Decrement upon Order
+7. Patron Order Tracking & Historical Commission Dossier
+8. Commission Certificate Generation & Print Capabilities
+9. Verified Collector Reviews & 5-Star Rating System
+10. Atelier Workshop Console (Inventory, Restock, Orders, Telemetry, New Mint)
+
+2.3 User Classes and Characteristics
+- Customer / Patron:
+  * Register and authenticate via unique email address
+  * Maintain delivery addresses and contact information
+  * Browse and search heirloom statues and ceremonial vessels
+  * Add items to curation bag with live tax and discount token calculations
+  * Complete checkout with COD or digital payment
+  * Review order history and inspect individual commission certificates
+  * Post reviews on acquired artworks
+
+- Atelier Administrator / Guildmaster:
+  * Full access to Django standard administration (/admin/)
+  * Access to dedicated Atelier Management Dashboard (/atelier/)
+  * Update order fulfillment stages in real time
+  * Trigger immediate furnace smelt restocks (+5 units)
+  * Mint new brass casting records with metallurgical specifications
+  * View aggregate fiscal telemetry and category distribution
+
+2.4 Operating Environment
+- Operating System : macOS, Linux, or Windows 10/11
+- Runtime          : Python 3.10+ (tested on Python 3.14)
+- Web Framework    : Django 6.1+
+- Database         : SQLite 3 / MySQL / PostgreSQL
+- Web Browsers     : Google Chrome, Mozilla Firefox, Apple Safari, Microsoft Edge
+
+2.5 Design and Implementation Constraints
+- Django MVT architectural pattern
+- Strict CSRF protection on all mutating POST endpoints
+- Unique email constraint for patron accounts
+- Safe integer quantity updates to prevent negative stock counts
+- Responsive fluid grid supporting mobile (375px+), tablet (768px+), and desktop (1280px+)
+
+==============================================================================
+3. SYSTEM DATABASE DESIGN & TABLES
+==============================================================================
+The database schema strictly adheres to the System Design specifications:
+
+TABLE 1: store_user (Custom User Model)
+------------------------------------------------------------------------------
+Field Name       | Data Type    | Constraints                  | Description
+-----------------+--------------+------------------------------+---------------------------
+id               | INT (PK)     | AUTO_INCREMENT               | Unique ID of the user
+first_name       | VARCHAR(100) | NOT NULL                     | User's first name
+last_name        | VARCHAR(100) | NOT NULL                     | User's last name
+email            | VARCHAR(150) | UNIQUE, NOT NULL             | Email used for login
+password         | VARCHAR(255) | NOT NULL                     | PBKDF2/SHA-256 hashed pwd
+phone            | VARCHAR(20)  | NULL, BLANK                  | Contact phone number
+address          | TEXT         | NULL, BLANK                  | Default delivery address
+role             | VARCHAR(20)  | NOT NULL, DEFAULT 'Customer' | 'Customer' or 'Admin'
+is_staff         | BOOLEAN      | DEFAULT FALSE                | Admin console access flag
+is_active        | BOOLEAN      | DEFAULT TRUE                 | Account active status
+date_joined      | DATETIME     | NOT NULL                     | Inscription timestamp
+
+TABLE 2: store_product (Artisanal Brass Artifacts)
+------------------------------------------------------------------------------
+Field Name       | Data Type    | Constraints                  | Description
+-----------------+--------------+------------------------------+---------------------------
+id               | INT (PK)     | AUTO_INCREMENT               | Unique ID of the product
+product_name     | VARCHAR(150) | NOT NULL                     | Handcrafted artwork name
+sku              | VARCHAR(50)  | UNIQUE, NOT NULL             | Guild inventory SKU code
+category         | VARCHAR(100) | NOT NULL                     | Deities, Diyas, Urulis, etc.
+description      | TEXT         | NOT NULL                     | Iconography & history text
+price            | DECIMAL(10,2)| NOT NULL                     | Selling price in USD
+original_price   | DECIMAL(10,2)| NULL, BLANK                  | Pre-privilege retail price
+stock_quantity   | INT          | NOT NULL, DEFAULT 0          | Current available units
+is_available     | BOOLEAN      | DEFAULT TRUE                 | Purchase eligibility flag
+weight           | VARCHAR(50)  | DEFAULT '3.5 kg'             | Physical weight spec
+dimensions       | VARCHAR(100) | DEFAULT '14" x 10"'          | Height x Width dimensions
+alloy_blend      | VARCHAR(120) | NOT NULL                     | Metallurgy alloy blend
+patina_finish    | VARCHAR(100) | NOT NULL                     | Antique Ochre, Polished, etc.
+casting_technique| VARCHAR(120) | NOT NULL                     | Cire-Perdue, Sand Cast, etc.
+provenance       | VARCHAR(150) | NOT NULL                     | Sthapati collective guild
+is_featured      | BOOLEAN      | DEFAULT FALSE                | Hero showcase flag
+created_at       | DATETIME     | AUTO_NOW_ADD                 | Creation timestamp
+
+TABLE 3: store_productimage (Product Photography & Renderings)
+------------------------------------------------------------------------------
+Field Name       | Data Type    | Constraints                  | Description
+-----------------+--------------+------------------------------+---------------------------
+id               | INT (PK)     | AUTO_INCREMENT               | Unique ID of the image
+product_id       | INT (FK)     | REFERENCES store_product(id) | Target product relation
+image_path       | VARCHAR(500) | NOT NULL                     | Stored image path or URL
+is_primary       | BOOLEAN      | DEFAULT FALSE                | Primary thumbnail flag
+
+TABLE 4: store_cart (User Shopping Cart)
+------------------------------------------------------------------------------
+Field Name       | Data Type    | Constraints                  | Description
+-----------------+--------------+------------------------------+---------------------------
+id               | INT (PK)     | AUTO_INCREMENT               | Unique ID of the cart
+user_id          | INT (FK, UQ) | REFERENCES store_user(id)    | 1:1 active cart per user
+created_at       | DATETIME     | AUTO_NOW_ADD                 | Creation timestamp
+
+TABLE 5: store_cartitem (Cart Line Items)
+------------------------------------------------------------------------------
+Field Name       | Data Type    | Constraints                  | Description
+-----------------+--------------+------------------------------+---------------------------
+id               | INT (PK)     | AUTO_INCREMENT               | Unique ID of the cart item
+cart_id          | INT (FK)     | REFERENCES store_cart(id)    | Parent cart relation
+product_id       | INT (FK)     | REFERENCES store_product(id) | Selected product relation
+quantity         | INT          | NOT NULL, DEFAULT 1          | Number of pieces
+unit_price       | DECIMAL(10,2)| NOT NULL                     | Price at addition time
+
+TABLE 6: store_order (Commission Orders)
+------------------------------------------------------------------------------
+Field Name       | Data Type    | Constraints                  | Description
+-----------------+--------------+------------------------------+---------------------------
+id               | INT (PK)     | AUTO_INCREMENT               | Unique ID of the order
+order_reference  | VARCHAR(50)  | UNIQUE, NOT NULL             | Reference e.g. #ORD-9801
+user_id          | INT (FK)     | REFERENCES store_user(id)    | Ordering user relation
+order_date       | DATETIME     | AUTO_NOW_ADD                 | Placement timestamp
+first_name       | VARCHAR(100) | NOT NULL                     | Beneficiary first name
+last_name        | VARCHAR(100) | NOT NULL                     | Beneficiary last name
+phone            | VARCHAR(20)  | NOT NULL                     | Verification contact phone
+shipping_address | TEXT         | NOT NULL                     | Crate delivery coordinates
+delivery_notes   | VARCHAR(255) | NULL, BLANK                  | Handling directives
+total_amount     | DECIMAL(10,2)| NOT NULL                     | Grand total payable
+tax_amount       | DECIMAL(10,2)| DEFAULT 0.00                 | 3% GST on brass metalcraft
+discount_amount  | DECIMAL(10,2)| DEFAULT 0.00                 | Patron token deduction
+payment_status   | VARCHAR(30)  | NOT NULL                     | 'Pending','Paid','Failed','COD'
+order_status     | VARCHAR(30)  | NOT NULL, DEFAULT 'Processing'| 'Processing','Shipped','Delivered'
+
+TABLE 7: store_orderitem (Order Line Items)
+------------------------------------------------------------------------------
+Field Name       | Data Type    | Constraints                  | Description
+-----------------+--------------+------------------------------+---------------------------
+id               | INT (PK)     | AUTO_INCREMENT               | Unique ID of the order item
+order_id         | INT (FK)     | REFERENCES store_order(id)   | Parent order relation
+product_id       | INT (FK)     | REFERENCES store_product(id) | Purchased product
+quantity         | INT          | NOT NULL                     | Quantity fulfilled
+unit_price       | DECIMAL(10,2)| NOT NULL                     | Historical unit price
+subtotal         | DECIMAL(10,2)| NOT NULL                     | quantity x unit_price
+
+TABLE 8: store_payment (Treasury Settlements)
+------------------------------------------------------------------------------
+Field Name       | Data Type    | Constraints                  | Description
+-----------------+--------------+------------------------------+---------------------------
+id               | INT (PK)     | AUTO_INCREMENT               | Unique ID of payment
+order_id         | INT (FK, UQ) | REFERENCES store_order(id)   | 1:1 order settlement
+payment_method   | VARCHAR(30)  | NOT NULL                     | 'COD' or 'Online Payment'
+transaction_id   | VARCHAR(150) | UNIQUE, NULL, BLANK          | Gateway reference ID
+amount           | DECIMAL(10,2)| NOT NULL                     | Settled amount
+payment_status   | VARCHAR(30)  | NOT NULL                     | 'Pending','Paid','Failed','COD'
+payment_date     | DATETIME     | NULL, BLANK                  | Timestamp of clearance
+
+TABLE 9: store_inventory (Foundry Ingot Stock Sync)
+------------------------------------------------------------------------------
+Field Name       | Data Type    | Constraints                  | Description
+-----------------+--------------+------------------------------+---------------------------
+id               | INT (PK)     | AUTO_INCREMENT               | Unique ID of inventory
+product_id       | INT (FK, UQ) | REFERENCES store_product(id) | 1:1 product stock record
+quantity_available| INT         | NOT NULL, DEFAULT 0          | Current physical pieces
+last_updated     | DATETIME     | AUTO_NOW                     | Last smelt update time
+
+TABLE 10: store_review (Collector Testimonials)
+------------------------------------------------------------------------------
+Field Name       | Data Type    | Constraints                  | Description
+-----------------+--------------+------------------------------+---------------------------
+id               | INT (PK)     | AUTO_INCREMENT               | Unique ID of review
+user_id          | INT (FK)     | REFERENCES store_user(id)    | Reviewing patron
+product_id       | INT (FK)     | REFERENCES store_product(id) | Target artwork
+rating           | INT          | NOT NULL (1 to 5)            | Star score (1-5)
+comment          | TEXT         | NULL, BLANK                  | Review commentary text
+created_at       | DATETIME     | AUTO_NOW_ADD                 | Review post timestamp
+
+TABLE RELATIONSHIPS
+------------------------------------------------------------------------------
+- User 1 : 1 Cart (Each user has one persistent curation bag)
+- Cart 1 : N CartItem
+- Product 1 : N CartItem
+- User 1 : N Order (One patron can place multiple commissions)
+- Order 1 : N OrderItem
+- Product 1 : N OrderItem
+- Order 1 : 1 Payment (Each order is tied to one payment record)
+- Product 1 : 1 Inventory (Each product has a synchronized inventory record)
+- Product 1 : N ProductImage (Multiple detail angles per casting)
+- Product 1 : N Review (Multiple patron evaluations per piece)
+- User 1 : N Review
+
+==============================================================================
+4. URL ARCHITECTURE & ENDPOINTS
+==============================================================================
+Route                          | View Name             | Description
+-------------------------------+-----------------------+-----------------------------
+/                              | home                  | Luxury storefront showcase
+/catalog/                      | catalog               | Catalog with filters & search
+/product/<id>/                 | product_detail        | Single piece spec & reviews
+/cart/                         | cart_view             | Curation bag & checkout
+/cart/add/<id>/                | add_to_cart           | Add item to bag
+/cart/update/<item_id>/        | update_cart_item      | AJAX + / - quantity updater
+/cart/remove/<item_id>/        | remove_from_cart      | Remove item from bag
+/checkout/                     | checkout              | Process order & payment
+/order-confirmation/<order_id>/| order_confirmation    | Official commission receipt
+/orders/                       | order_list            | Patron orders history ledger
+/orders/<order_id>/            | order_detail          | Detailed order spec sheet
+/heritage/                     | heritage_story        | Lost-wax casting narrative
+/reviews/                      | reviews_view          | Patron appraisals & reviews
+/register/                     | user_register         | Account creation
+/login/                        | user_login            | Authentication portal
+/logout/                       | user_logout           | Terminate session
+/profile/                      | user_profile          | Update coordinates
+/atelier/                      | atelier_dashboard     | Workshop & inventory console
+/atelier/restock/<id>/         | atelier_quick_restock | AJAX +5 smelt stock increment
+/atelier/order-status/<id>/    | atelier_update_order  | Update fulfillment stage
+/atelier/add-product/          | atelier_add_product   | Mint new brass casting
+/atelier/orders/               | atelier_orders        | Order fulfillment ledger
+/atelier/products/             | atelier_products      | Catalog database table
+/atelier/analytics/            | atelier_analytics     | Fiscal and stock telemetry
+/admin/                        | django_admin          | Standard Django admin
+
+==============================================================================
+5. HOW TO RUN THE PROJECT LOCALLY
+==============================================================================
+Step 1: Ensure Python 3.10+ is installed.
+Step 2: Install required packages:
+        pip install django pillow
+
+Step 3: Apply migrations:
+        python manage.py makemigrations
+        python manage.py migrate
+
+Step 4: Seed pre-populated database with 14 artisanal brass castings, sample orders,
+        reviews, and default user accounts:
+        python manage.py seed_data
+
+Step 5: Run the development server:
+        python manage.py runserver
+
+Step 6: Open http://127.0.0.1:8000 in your browser.
+
+DEFAULT CREDENTIALS FOR TESTING:
+- Admin / Atelier Console:
+  Email    : admin@ambercast.com
+  Password : admin123
+  URL      : http://127.0.0.1:8000/atelier/ or /admin/
+
+- Patron / Customer Account:
+  Email    : devraj@heritage.com
+  Password : customer123
+  URL      : http://127.0.0.1:8000/login/
+
+PROMO TOKEN:
+- Apply voucher "AMBER10" during checkout for a 10% patron privilege discount.
+==============================================================================

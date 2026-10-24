@@ -1,0 +1,586 @@
+{% extends 'base.html' %}
+
+{% block title %}AMBERCAST — Handcrafted Brass Statues & Sacred Catalog{% endblock %}
+
+{% block content %}
+<div class="flex flex-col w-full">
+  <!-- Top Tonal Atmosphere Strip & Sub-navigation bar -->
+  <section class="w-full bg-surface-container-low px-margin-mobile md:px-margin-tablet lg:px-margin py-space-md shadow-sm border-b border-surface-container-highest">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+      <div class="flex items-center gap-space-sm flex-wrap">
+        <span class="font-label-sm text-label-sm uppercase tracking-widest text-outline">Atelier Curation</span>
+        <span class="text-outline-variant font-label-sm text-label-sm">/</span>
+        <span class="font-label-sm text-label-sm uppercase tracking-widest text-on-surface font-semibold">Chola &amp; Sand-Cast Statuary</span>
+        <span class="bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm px-2 py-0.5 rounded-full font-semibold">{{ products.count }} Foundry Masterpieces</span>
+      </div>
+
+      <!-- Sort Controls & Visual Switcher -->
+      <form method="GET" action="{% url 'catalog' %}" id="sort-form" class="flex items-center gap-space-md">
+        {% if search_query %}<input type="hidden" name="q" value="{{ search_query }}">{% endif %}
+        {% if selected_category %}<input type="hidden" name="category" value="{{ selected_category }}">{% endif %}
+        {% if selected_patina %}<input type="hidden" name="patina" value="{{ selected_patina }}">{% endif %}
+        {% if max_price %}<input type="hidden" name="max_price" value="{{ max_price }}">{% endif %}
+
+        <div class="flex items-center gap-2">
+          <label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider" for="catalog-sort">Arrange By:</label>
+          <div class="relative">
+            <select name="sort" onchange="document.getElementById('sort-form').submit();" class="appearance-none bg-surface-container-lowest font-body-sm text-body-sm text-on-surface py-1.5 pl-3 pr-8 rounded shadow-sm focus:outline-none focus:ring-1 focus:ring-primary border border-surface-container-high" id="catalog-sort">
+              <option value="curator" {% if selected_sort == 'curator' %}selected{% endif %}>Curator Selection • Popularity</option>
+              <option value="price-asc" {% if selected_sort == 'price-asc' %}selected{% endif %}>Price • Low to High</option>
+              <option value="price-desc" {% if selected_sort == 'price-desc' %}selected{% endif %}>Price • High to Low</option>
+              <option value="newest" {% if selected_sort == 'newest' %}selected{% endif %}>Newest Artisan Forge Arrivals</option>
+              <option value="weight" {% if selected_sort == 'weight' %}selected{% endif %}>Heirloom Weight (kg)</option>
+            </select>
+            <span class="material-symbols-outlined absolute right-2 top-2 text-base text-on-surface-variant pointer-events-none">expand_more</span>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- Editorial Spotlight: Nataraja 18-inch Masterwork -->
+  {% if spotlight_product %}
+  <section class="w-full bg-surface-container-lowest px-margin-mobile md:px-margin-tablet lg:px-margin py-space-xl border-b border-surface-container-high">
+    <div class="max-w-7xl mx-auto">
+      <div class="bg-surface-container-low rounded-xl p-space-md md:p-space-xl shadow-md relative overflow-hidden border border-surface-container-high">
+        <!-- Foundry Seal Watermark Decoration -->
+        <div class="absolute -right-12 -bottom-12 w-80 h-80 rounded-full bg-primary/5 pointer-events-none flex items-center justify-center">
+          <span class="material-symbols-outlined text-[160px] text-primary/10">verified</span>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-center relative z-10">
+          <!-- Spotlight Imagery & Interactive Gallery Strip -->
+          <div class="lg:col-span-7 flex flex-col gap-space-md">
+            <div class="relative w-full h-[380px] md:h-[480px] rounded-lg overflow-hidden bg-surface-container-high shadow-inner group">
+              <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" id="spotlight-main-img" alt="{{ spotlight_product.product_name }}" src="{{ spotlight_product.primary_image_url }}">
+              
+              <!-- Floating Hallmark Badges -->
+              <div class="absolute top-4 left-4 flex flex-col gap-2">
+                <span class="font-label-sm text-label-sm uppercase px-3 py-1 bg-surface-container-lowest/90 backdrop-blur-md text-secondary font-bold rounded shadow-sm flex items-center gap-1.5 border border-outline-variant/30">
+                  <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span> Master Cire-Perdue Cast
+                </span>
+                <span class="font-label-sm text-label-sm uppercase px-2.5 py-1 bg-surface-container-lowest/90 backdrop-blur-md text-on-surface font-semibold rounded shadow-sm border border-outline-variant/30">
+                  Foundry Hallmarked: {{ spotlight_product.sku }}
+                </span>
+              </div>
+              
+              <div class="absolute bottom-4 right-4 bg-inverse-surface/80 text-inverse-on-surface px-3 py-1.5 rounded flex items-center gap-2 backdrop-blur-sm shadow-md">
+                <span class="material-symbols-outlined text-sm text-inverse-primary">360</span>
+                <span class="font-label-sm text-label-sm uppercase tracking-wider">360° Atelier Spin</span>
+              </div>
+            </div>
+
+            <!-- Thumbnail Reel with Active Indicators -->
+            <div class="flex items-center gap-space-sm overflow-x-auto pb-1">
+              {% for img in spotlight_product.images.all %}
+              <button class="relative flex-shrink-0 w-20 h-20 rounded bg-surface-container-high overflow-hidden shadow-sm {% if forloop.first %}ring-2 ring-primary{% else %}opacity-75 hover:opacity-100{% endif %} transition-all" data-img-path="{{ img.image_path }}" onclick="changeSpotlightImage(this, this.dataset.imgPath)">
+                <img class="w-full h-full object-cover" alt="Angle {{ forloop.counter }}" src="{{ img.image_path }}">
+              </button>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Product Details & Spec Ledger Panel -->
+          <div class="lg:col-span-5 flex flex-col justify-between">
+            <div class="space-y-space-sm">
+              <div class="flex items-center justify-between">
+                <span class="font-label-sm text-label-sm text-secondary font-bold uppercase tracking-widest bg-secondary-fixed text-on-secondary-fixed px-2.5 py-0.5 rounded">
+                  Curator's Centerpiece
+                </span>
+                <div class="flex items-center gap-1 text-primary">
+                  <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+                  <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+                  <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+                  <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+                  <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star_half</span>
+                  <span class="font-label-md text-label-md text-on-surface font-bold ml-1">4.9</span>
+                  <span class="font-body-sm text-body-sm text-on-surface-variant">({{ spotlight_product.review_count|default:"118" }} connoisseur reviews)</span>
+                </div>
+              </div>
+              <h2 class="font-headline-lg text-headline-lg text-on-surface tracking-tight leading-tight">
+                {{ spotlight_product.product_name }}
+              </h2>
+              <p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                {{ spotlight_product.description }}
+              </p>
+            </div>
+
+            <!-- Metallurgical Spec Sheet -->
+            <div class="my-space-md p-space-md bg-surface-container-lowest rounded-lg shadow-sm space-y-space-xs border border-surface-container-high">
+              <div class="flex items-center justify-between pb-1 text-on-surface font-semibold font-label-md text-label-md">
+                <span class="uppercase tracking-wider text-outline flex items-center gap-1">
+                  <span class="material-symbols-outlined text-sm text-primary">science</span> Metallurgical Registry
+                </span>
+                <span class="text-secondary font-label-sm text-label-sm uppercase bg-secondary-fixed-dim/30 px-2 py-0.5 rounded">Solid Lost-Wax Core</span>
+              </div>
+              <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-xs pt-1">
+                <div class="flex justify-between py-1 bg-surface-container-low px-2 rounded">
+                  <span class="text-on-surface-variant font-label-sm text-label-sm uppercase">Net Weight</span>
+                  <span class="font-semibold text-on-surface font-body-sm text-body-sm">{{ spotlight_product.weight }}</span>
+                </div>
+                <div class="flex justify-between py-1 bg-surface-container-low px-2 rounded">
+                  <span class="text-on-surface-variant font-label-sm text-label-sm uppercase">Height / Base</span>
+                  <span class="font-semibold text-on-surface font-body-sm text-body-sm">{{ spotlight_product.dimensions }}</span>
+                </div>
+                <div class="flex justify-between py-1 bg-surface-container-low px-2 rounded">
+                  <span class="text-on-surface-variant font-label-sm text-label-sm uppercase">Alloy Blend</span>
+                  <span class="font-semibold text-on-surface font-body-sm text-body-sm">{{ spotlight_product.alloy_blend }}</span>
+                </div>
+                <div class="flex justify-between py-1 bg-surface-container-low px-2 rounded">
+                  <span class="text-on-surface-variant font-label-sm text-label-sm uppercase">Patina Finish</span>
+                  <span class="font-semibold text-on-surface font-body-sm text-body-sm">{{ spotlight_product.patina_finish }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Price & Purchase Actions -->
+            <div class="space-y-space-md">
+              <div class="flex items-baseline justify-between">
+                <div>
+                  <span class="font-headline-lg text-headline-lg text-on-surface font-bold">₹{{ spotlight_product.price }}</span>
+                  {% if spotlight_product.original_price %}
+                    <span class="font-body-md text-body-md line-through text-outline ml-2">₹{{ spotlight_product.original_price }}</span>
+                  {% endif %}
+                </div>
+                <div class="flex items-center gap-1.5 text-secondary">
+                  <span class="material-symbols-outlined text-sm">inventory_2</span>
+                  <span class="font-label-sm text-label-sm font-semibold uppercase">Only {{ spotlight_product.stock_quantity }} Casts In Vault</span>
+                </div>
+              </div>
+
+              <!-- Delivery Note -->
+              <div class="flex items-center justify-between p-space-sm bg-surface-container-high rounded text-xs">
+                <div class="flex items-center gap-2">
+                  <span class="material-symbols-outlined text-base text-primary">local_shipping</span>
+                  <span class="font-body-sm text-body-sm text-on-surface font-medium">Insured Vault Freight + Cash on Delivery (COD)</span>
+                </div>
+                <span class="px-2 py-0.5 rounded bg-primary text-on-primary font-label-sm text-label-sm uppercase font-bold">Enabled</span>
+              </div>
+
+              <div class="grid grid-cols-2 gap-space-sm">
+                <a href="{% url 'add_to_cart' spotlight_product.id %}" class="w-full bg-primary-container text-on-primary-container hover:bg-primary hover:text-on-primary transition-all font-label-md text-label-md py-3 px-4 rounded font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm">
+                  <span class="material-symbols-outlined text-lg">add_shopping_cart</span>
+                  <span>Add to Vault Cart</span>
+                </a>
+                <a href="{% url 'product_detail' spotlight_product.id %}" class="w-full bg-inverse-surface text-inverse-on-surface hover:bg-black transition-all font-label-md text-label-md py-3 px-4 rounded font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-md">
+                  <span class="material-symbols-outlined text-lg">bolt</span>
+                  <span>Inspect Spec</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Search Header & Category Pills Bar -->
+  <section class="w-full px-margin-mobile md:px-margin-tablet lg:px-margin py-space-md">
+    <div class="max-w-7xl mx-auto flex flex-col gap-space-md">
+      <div class="flex flex-col lg:flex-row gap-space-md items-stretch lg:items-center justify-between">
+        <form method="GET" action="{% url 'catalog' %}" class="relative flex-1">
+          <span class="material-symbols-outlined absolute left-3.5 top-3 text-on-surface-variant text-xl">search</span>
+          <input class="w-full bg-surface-container-lowest text-on-surface font-body-md text-body-md pl-11 pr-24 py-2.5 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-primary border border-surface-container-high" name="q" value="{{ search_query }}" placeholder="Search handcrafted brass idols, deepams, temple bells, urulis by weight or finish..." type="text">
+          {% if search_query %}
+            <a href="{% url 'catalog' %}" class="absolute right-2 top-2 px-3 py-1 bg-surface-container-high hover:bg-surface-container-highest text-on-surface-variant font-label-sm text-label-sm rounded uppercase tracking-wider">Clear</a>
+          {% else %}
+            <button type="submit" class="absolute right-2 top-2 px-3 py-1 bg-primary text-on-primary font-label-sm text-label-sm rounded uppercase tracking-wider">Search</button>
+          {% endif %}
+        </form>
+
+        <!-- Category Pills -->
+        <div class="flex items-center gap-space-sm overflow-x-auto py-1">
+          <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline whitespace-nowrap">Instant Views:</span>
+          <a href="{% url 'catalog' %}" class="px-3 py-1.5 rounded-full {% if not selected_category %}bg-secondary-fixed text-on-secondary-fixed font-bold{% else %}bg-surface-container-lowest text-on-surface hover:bg-surface-container-high{% endif %} font-label-sm text-label-sm uppercase tracking-wider whitespace-nowrap shadow-sm border border-surface-container-high">
+            All Castings ({{ products.count }})
+          </a>
+          <a href="{% url 'catalog' %}?category=Temple+Deities" class="px-3 py-1.5 rounded-full {% if selected_category == 'Temple Deities' %}bg-secondary-fixed text-on-secondary-fixed font-bold{% else %}bg-surface-container-lowest text-on-surface hover:bg-surface-container-high{% endif %} font-label-sm text-label-sm uppercase tracking-wider whitespace-nowrap shadow-sm border border-surface-container-high">
+            Temple Deities
+          </a>
+          <a href="{% url 'catalog' %}?category=Ritual+Diyas+%26+Deepams" class="px-3 py-1.5 rounded-full {% if selected_category == 'Ritual Diyas & Deepams' %}bg-secondary-fixed text-on-secondary-fixed font-bold{% else %}bg-surface-container-lowest text-on-surface hover:bg-surface-container-high{% endif %} font-label-sm text-label-sm uppercase tracking-wider whitespace-nowrap shadow-sm border border-surface-container-high">
+            Mayil &amp; Diyas
+          </a>
+          <a href="{% url 'catalog' %}?category=Water+Urulis+%26+Bowls" class="px-3 py-1.5 rounded-full {% if selected_category == 'Water Urulis & Bowls' %}bg-secondary-fixed text-on-secondary-fixed font-bold{% else %}bg-surface-container-lowest text-on-surface hover:bg-surface-container-high{% endif %} font-label-sm text-label-sm uppercase tracking-wider whitespace-nowrap shadow-sm border border-surface-container-high">
+            Water Urulis
+          </a>
+          <a href="{% url 'catalog' %}?category=Resonant+Ghanta+Bells" class="px-3 py-1.5 rounded-full {% if selected_category == 'Resonant Ghanta Bells' %}bg-secondary-fixed text-on-secondary-fixed font-bold{% else %}bg-surface-container-lowest text-on-surface hover:bg-surface-container-high{% endif %} font-label-sm text-label-sm uppercase tracking-wider whitespace-nowrap shadow-sm border border-surface-container-high">
+            Temple Bells
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Catalog Workspace: Filter Sidebar + Rich Product Grid -->
+  <div class="w-full px-margin-mobile md:px-margin-tablet lg:px-margin pb-space-xl">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-start">
+      <!-- Multi-attribute Facet Filtering Sidebar -->
+      <aside class="lg:col-span-3 bg-surface-container-lowest rounded-xl p-space-md shadow-sm space-y-space-lg sticky top-24 border border-surface-container-high">
+        <div class="flex items-center justify-between pb-space-xs">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-xl">tune</span>
+            <span class="font-label-lg text-label-lg uppercase tracking-wider font-bold text-on-surface">Curator Filters</span>
+          </div>
+          <a href="{% url 'catalog' %}" class="text-secondary font-label-sm text-label-sm uppercase tracking-wider hover:underline">
+            Reset All
+          </a>
+        </div>
+
+        <!-- Facet Group 1: Category -->
+        <div class="space-y-space-xs">
+          <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline block font-semibold">Artisan Classification</span>
+          <div class="space-y-1 pt-1">
+            {% for cat_val, cat_label in categories %}
+              <a href="{% url 'catalog' %}?category={{ cat_val|urlencode }}{% if search_query %}&q={{ search_query }}{% endif %}" class="flex items-center justify-between text-body-sm font-body-sm {% if selected_category == cat_val %}bg-primary/10 text-primary font-bold{% else %}text-on-surface hover:bg-surface-container-low{% endif %} px-2 py-1.5 rounded transition-colors">
+                <span>{{ cat_val }}</span>
+                {% if selected_category == cat_val %}
+                  <span class="material-symbols-outlined text-sm text-primary">check</span>
+                {% endif %}
+              </a>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Facet Group 2: Surface Finish / Patina -->
+        <div class="space-y-space-xs">
+          <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline block font-semibold">Surface Patina</span>
+          <div class="grid grid-cols-1 gap-1.5 pt-1">
+            <a href="{% url 'catalog' %}?patina=Antique{% if selected_category %}&category={{ selected_category|urlencode }}{% endif %}" class="flex items-center justify-between px-2.5 py-1.5 rounded {% if selected_patina == 'Antique' %}bg-surface-container-high text-primary font-semibold{% else %}hover:bg-surface-container-low text-on-surface-variant{% endif %} font-body-sm text-body-sm text-left">
+              <span class="flex items-center gap-2">
+                <span class="w-3.5 h-3.5 rounded-full bg-secondary"></span>
+                <span>Antique Brown Patina</span>
+              </span>
+              {% if selected_patina == 'Antique' %}<span class="material-symbols-outlined text-sm text-primary">check</span>{% endif %}
+            </a>
+            <a href="{% url 'catalog' %}?patina=Golden{% if selected_category %}&category={{ selected_category|urlencode }}{% endif %}" class="flex items-center justify-between px-2.5 py-1.5 rounded {% if selected_patina == 'Golden' %}bg-surface-container-high text-primary font-semibold{% else %}hover:bg-surface-container-low text-on-surface-variant{% endif %} font-body-sm text-body-sm text-left">
+              <span class="flex items-center gap-2">
+                <span class="w-3.5 h-3.5 rounded-full bg-primary-fixed-dim"></span>
+                <span>Polished Golden Brass</span>
+              </span>
+              {% if selected_patina == 'Golden' %}<span class="material-symbols-outlined text-sm text-primary">check</span>{% endif %}
+            </a>
+            <a href="{% url 'catalog' %}?patina=Bronze{% if selected_category %}&category={{ selected_category|urlencode }}{% endif %}" class="flex items-center justify-between px-2.5 py-1.5 rounded {% if selected_patina == 'Bronze' %}bg-surface-container-high text-primary font-semibold{% else %}hover:bg-surface-container-low text-on-surface-variant{% endif %} font-body-sm text-body-sm text-left">
+              <span class="flex items-center gap-2">
+                <span class="w-3.5 h-3.5 rounded-full bg-tertiary"></span>
+                <span>Smoked Matte Bronze</span>
+              </span>
+              {% if selected_patina == 'Bronze' %}<span class="material-symbols-outlined text-sm text-primary">check</span>{% endif %}
+            </a>
+          </div>
+        </div>
+
+        <!-- Facet Group 3: Price Range Slider -->
+        <form method="GET" action="{% url 'catalog' %}" class="space-y-space-xs">
+          {% if selected_category %}<input type="hidden" name="category" value="{{ selected_category }}">{% endif %}
+          {% if search_query %}<input type="hidden" name="q" value="{{ search_query }}">{% endif %}
+          <div class="flex items-center justify-between">
+            <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">Max Price</span>
+            <span class="font-label-sm text-label-sm text-secondary font-bold" id="price-display">₹{{ max_price }}</span>
+          </div>
+          <div class="pt-2">
+            <input class="w-full accent-secondary bg-surface-container-high h-1.5 rounded cursor-pointer" max="3500" min="100" name="max_price" oninput="document.getElementById('price-display').innerText = '₹' + this.value" type="range" value="{{ max_price }}">
+            <div class="flex justify-between text-xs text-outline pt-1">
+              <span>₹100</span>
+              <span>₹3,500+</span>
+            </div>
+          </div>
+          <button type="submit" class="w-full mt-2 py-1.5 bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label-sm text-label-sm rounded uppercase font-semibold transition-colors">
+            Filter Price
+          </button>
+        </form>
+
+        <!-- Foundry Guarantee Box -->
+        <div class="p-space-sm bg-surface-container-low rounded text-xs space-y-1 border border-surface-container-high">
+          <div class="flex items-center gap-1.5 text-primary font-semibold font-label-sm text-label-sm uppercase">
+            <span class="material-symbols-outlined text-sm">shield</span> AmberCast Pledge
+          </div>
+          <p class="text-on-surface-variant font-body-sm text-body-sm leading-tight">
+            100% solid brass purity test certificate included with each boxed artwork.
+          </p>
+        </div>
+      </aside>
+
+      <!-- Rich Product Grid Viewport -->
+      <div class="lg:col-span-9 flex flex-col gap-space-lg">
+        <!-- Active Filter Tags Strip -->
+        <div class="flex items-center gap-2 flex-wrap text-xs">
+          <span class="font-label-sm text-label-sm uppercase text-outline">Active Filters:</span>
+          {% if selected_category %}
+            <span class="bg-surface-container-high text-on-surface px-2.5 py-1 rounded-full flex items-center gap-1 font-label-sm text-label-sm">
+              {{ selected_category }} <a href="{% url 'catalog' %}" class="hover:text-error">×</a>
+            </span>
+          {% endif %}
+          {% if selected_patina %}
+            <span class="bg-surface-container-high text-on-surface px-2.5 py-1 rounded-full flex items-center gap-1 font-label-sm text-label-sm">
+              Patina: {{ selected_patina }} <a href="{% url 'catalog' %}" class="hover:text-error">×</a>
+            </span>
+          {% endif %}
+          {% if search_query %}
+            <span class="bg-surface-container-high text-on-surface px-2.5 py-1 rounded-full flex items-center gap-1 font-label-sm text-label-sm">
+              Query: "{{ search_query }}" <a href="{% url 'catalog' %}" class="hover:text-error">×</a>
+            </span>
+          {% endif %}
+          <a href="{% url 'catalog' %}" class="text-secondary hover:underline font-label-sm text-label-sm uppercase tracking-wider font-semibold ml-2">
+            Clear Filters
+          </a>
+        </div>
+
+        <!-- The Artisan Brass Catalog Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-space-md" id="product-grid">
+          {% for product in products %}
+          <article class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group relative border border-surface-container-high">
+            <div class="relative w-full h-72 bg-surface-container-low overflow-hidden">
+              <a href="{% url 'product_detail' product.id %}">
+                <img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="{{ product.product_name }}" src="{{ product.primary_image_url }}">
+              </a>
+              <!-- Wishlist Heart Button -->
+              <button type="button" data-product-id="{{ product.id }}" class="absolute top-3 right-3 w-9 h-9 rounded-full bg-surface-container-lowest/80 backdrop-blur-md flex items-center justify-center {% if product.id in wishlist_product_ids %}text-error{% else %}text-outline hover:text-error{% endif %} transition-colors shadow-sm" onclick="toggleWishlistCatalog(this)" title="Save to Wishlist">
+                <span class="material-symbols-outlined text-lg {% if product.id in wishlist_product_ids %}fill-1{% endif %}">favorite</span>
+              </button>
+              <!-- Weight Badge -->
+              <span class="absolute top-3 left-3 font-label-sm text-label-sm uppercase px-2 py-0.5 rounded bg-surface-container-lowest/90 backdrop-blur-sm text-on-surface font-semibold shadow-sm border border-outline-variant/30">
+                {{ product.weight }}
+              </span>
+              <!-- Quick Action Overlay -->
+              <div class="absolute inset-x-3 bottom-3 translate-y-12 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 flex gap-2">
+                <button type="button" class="btn-quick-inspect flex-1 bg-surface-container-lowest/95 hover:bg-surface-container-lowest text-on-surface font-label-sm text-label-sm py-2 rounded font-bold uppercase tracking-wider shadow-md backdrop-blur-sm flex items-center justify-center gap-1" data-name="{{ product.product_name }}" data-price="₹{{ product.price }}" data-weight="{{ product.weight }}" data-finish="{{ product.patina_finish }}" data-alloy="{{ product.alloy_blend }}" data-img="{{ product.primary_image_url }}" data-id="{{ product.id }}">
+                  <span class="material-symbols-outlined text-sm">visibility</span> Quick Inspect
+                </button>
+              </div>
+            </div>
+
+            <div class="p-space-md flex flex-col flex-1 justify-between gap-space-sm">
+              <div class="space-y-1">
+                <div class="flex items-center justify-between">
+                  <span class="font-label-sm text-label-sm uppercase text-secondary font-bold">{{ product.category }}</span>
+                  <div class="flex items-center gap-1 text-primary">
+                    <span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+                    <span class="font-label-sm text-label-sm font-bold text-on-surface">{{ product.average_rating }}</span>
+                    <span class="text-outline text-xs">({{ product.review_count|default:"45" }})</span>
+                  </div>
+                </div>
+                <h3 class="font-headline-sm text-headline-sm text-on-surface line-clamp-1 hover:text-primary transition-colors">
+                  <a href="{% url 'product_detail' product.id %}">{{ product.product_name }}</a>
+                </h3>
+                <p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">{{ product.description }}</p>
+              </div>
+
+              <!-- Price & Quick Add Button -->
+              <div class="pt-2 border-t border-surface-container flex items-center justify-between">
+                <div>
+                  <span class="font-headline-sm text-headline-sm text-on-surface font-bold">₹{{ product.price }}</span>
+                  <span class="block font-label-sm text-label-sm text-outline">In Stock ({{ product.stock_quantity }})</span>
+                </div>
+                <a href="{% url 'add_to_cart' product.id %}" class="p-2.5 rounded bg-surface-container-high hover:bg-primary hover:text-on-primary text-on-surface transition-colors shadow-sm flex items-center justify-center" title="Add to Cart">
+                  <span class="material-symbols-outlined text-lg">add_shopping_cart</span>
+                </a>
+              </div>
+            </div>
+          </article>
+          {% empty %}
+          <div class="col-span-3 text-center py-16 bg-surface-container-lowest rounded-xl p-space-xl border border-surface-container-high">
+            <span class="material-symbols-outlined text-5xl text-outline-variant mb-2">search_off</span>
+            <h3 class="font-headline-sm text-headline-sm text-on-surface">No castings match your criteria</h3>
+            <p class="font-body-sm text-on-surface-variant mt-1">Try resetting your filters or exploring our standard deity categories.</p>
+            <a href="{% url 'catalog' %}" class="inline-block mt-4 px-4 py-2 bg-primary text-on-primary font-label-md text-label-md uppercase rounded">View Full Catalog</a>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Catalog Footer -->
+        <div class="mt-space-md pt-space-md bg-surface-container-lowest rounded-xl p-space-md flex flex-col sm:flex-row items-center justify-between gap-space-md shadow-sm border border-surface-container-high">
+          <div class="font-body-sm text-body-sm text-on-surface-variant">
+            Displaying <span class="text-on-surface font-semibold">{{ products.count }}</span> heirloom cast pieces
+          </div>
+          <div class="flex items-center gap-1">
+            <span class="font-label-sm text-label-sm text-outline uppercase font-semibold">AmberCast Quality Verified</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Flyout Quick Detail & Inspection Drawer -->
+  <div class="fixed inset-0 z-50 bg-inverse-surface/60 backdrop-blur-sm hidden transition-opacity duration-300" id="preview-drawer-backdrop">
+    <div class="fixed top-0 right-0 h-full w-full max-w-lg bg-surface-container-lowest shadow-2xl p-space-lg flex flex-col justify-between overflow-y-auto transform translate-x-full transition-transform duration-300" id="preview-drawer-card">
+      <div>
+        <div class="flex items-center justify-between pb-space-md">
+          <span class="font-label-sm text-label-sm uppercase tracking-widest text-secondary font-bold">
+            Artisan Inspection Sheet
+          </span>
+          <button class="p-2 rounded-full hover:bg-surface-container-high text-on-surface-variant" onclick="closeDrawer()">
+            <span class="material-symbols-outlined text-xl">close</span>
+          </button>
+        </div>
+
+        <div class="space-y-space-sm">
+          <div class="w-full h-64 rounded-lg bg-surface-container-high overflow-hidden relative shadow-inner">
+            <img class="w-full h-full object-cover" id="drawer-image" alt="Inspection Preview" src="">
+            <span class="absolute bottom-3 left-3 bg-inverse-surface/80 text-inverse-on-surface font-label-sm text-label-sm px-2.5 py-1 rounded backdrop-blur-sm">
+              Cast Hallmark Validated
+            </span>
+          </div>
+          <h3 class="font-headline-md text-headline-md text-on-surface leading-tight pt-2" id="drawer-title">
+            Selected Brass Artwork
+          </h3>
+          <div class="flex items-center gap-2">
+            <span class="font-headline-sm text-headline-sm text-on-surface font-bold" id="drawer-price">₹0.00</span>
+            <span class="text-outline text-xs">• Insured Worldwide Dispatch Included</span>
+          </div>
+
+          <!-- Spec Matrix -->
+          <div class="p-space-md bg-surface-container-low rounded-lg space-y-2 mt-4 border border-surface-container-high">
+            <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline block font-semibold">Foundry Parameters</span>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <div class="bg-surface-container-lowest p-2 rounded">
+                <span class="text-outline block font-label-sm text-label-sm uppercase">Mass / Weight</span>
+                <span class="font-semibold text-on-surface font-body-sm text-body-sm" id="drawer-weight">-- kg</span>
+              </div>
+              <div class="bg-surface-container-lowest p-2 rounded">
+                <span class="text-outline block font-label-sm text-label-sm uppercase">Selected Finish</span>
+                <span class="font-semibold text-on-surface font-body-sm text-body-sm" id="drawer-finish">Antique Patina</span>
+              </div>
+              <div class="bg-surface-container-lowest p-2 rounded">
+                <span class="text-outline block font-label-sm text-label-sm uppercase">Technique</span>
+                <span class="font-semibold text-on-surface font-body-sm text-body-sm">Lost-Wax Sand Casting</span>
+              </div>
+              <div class="bg-surface-container-lowest p-2 rounded">
+                <span class="text-outline block font-label-sm text-label-sm uppercase">Purity Assay</span>
+                <span class="font-semibold text-on-surface font-body-sm text-body-sm" id="drawer-alloy">82/18 Certified Brass</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Testimonial -->
+          <div class="p-space-sm bg-surface-container-lowest rounded border-l-2 border-secondary space-y-1">
+            <div class="flex items-center gap-1 text-primary">
+              <span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+              <span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+              <span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+              <span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+              <span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+            </div>
+            <p class="font-body-sm text-body-sm text-on-surface italic">“The weight in hand is astonishing. The facial features possess an austere serenity only master casting delivers.”</p>
+            <span class="font-label-sm text-label-sm text-outline uppercase">— Heritage Arts Collector</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Drawer Bottom Action Panel -->
+      <div class="pt-space-md border-t border-surface-container-high space-y-space-sm">
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-on-surface-variant font-label-sm text-label-sm uppercase">Payment Option:</span>
+          <span class="text-secondary font-semibold font-label-sm text-label-sm uppercase">COD &amp; Online Gateway Available</span>
+        </div>
+        <a href="#" id="drawer-cart-link" class="w-full bg-primary-container text-on-primary-container hover:bg-primary hover:text-on-primary transition-all font-label-md text-label-md py-3 rounded uppercase font-bold tracking-wider flex items-center justify-center gap-2 shadow-sm text-center">
+          <span class="material-symbols-outlined text-base">shopping_bag</span>
+          <span>Acquire Into Collection</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function changeSpotlightImage(button, imageSrc) {
+    const mainImg = document.getElementById('spotlight-main-img');
+    if (mainImg) mainImg.src = imageSrc;
+    const container = button.parentElement;
+    if (container) {
+      container.querySelectorAll('button').forEach(btn => {
+        btn.classList.remove('ring-2', 'ring-primary');
+        btn.classList.add('opacity-75');
+      });
+      button.classList.add('ring-2', 'ring-primary');
+      button.classList.remove('opacity-75');
+    }
+  }
+
+  function toggleWishlistCatalog(btn) {
+    const productId = btn.dataset.productId;
+    fetch(`/wishlist/toggle/${productId}/`, {
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+    .then(res => {
+      if (res.status === 401) {
+        window.location.href = `/login/?next=${encodeURIComponent(window.location.pathname)}`;
+        return null;
+      }
+      return res.json();
+    })
+    .then(data => {
+      if (!data) return;
+      const icon = btn.querySelector('.material-symbols-outlined');
+      const badge = document.getElementById('global-wishlist-badge');
+      if (data.in_wishlist) {
+        btn.classList.add('text-error');
+        btn.classList.remove('text-outline');
+        if (icon) icon.classList.add('fill-1');
+      } else {
+        btn.classList.remove('text-error');
+        btn.classList.add('text-outline');
+        if (icon) icon.classList.remove('fill-1');
+      }
+      if (badge && data.wishlist_count !== undefined) {
+        badge.innerText = data.wishlist_count;
+      }
+    })
+    .catch(err => console.error(err));
+  }
+
+
+  function openDrawer(title, price, weight, finish, alloy, imgSrc, productId) {
+    const backdrop = document.getElementById('preview-drawer-backdrop');
+    const drawer = document.getElementById('preview-drawer-card');
+    
+    document.getElementById('drawer-title').innerText = title;
+    document.getElementById('drawer-price').innerText = price;
+    document.getElementById('drawer-weight').innerText = weight;
+    document.getElementById('drawer-finish').innerText = finish;
+    document.getElementById('drawer-alloy').innerText = alloy;
+    document.getElementById('drawer-image').src = imgSrc;
+    document.getElementById('drawer-cart-link').href = "/cart/add/" + productId + "/";
+
+    backdrop.classList.remove('hidden');
+    setTimeout(() => {
+      drawer.classList.remove('translate-x-full');
+    }, 10);
+  }
+
+  function closeDrawer() {
+    const backdrop = document.getElementById('preview-drawer-backdrop');
+    const drawer = document.getElementById('preview-drawer-card');
+    if (drawer) drawer.classList.add('translate-x-full');
+    setTimeout(() => {
+      if (backdrop) backdrop.classList.add('hidden');
+    }, 300);
+  }
+
+  document.getElementById('preview-drawer-backdrop')?.addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeDrawer();
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.btn-quick-inspect').forEach(btn => {
+      btn.addEventListener('click', function() {
+        openDrawer(
+          this.dataset.name,
+          this.dataset.price,
+          this.dataset.weight,
+          this.dataset.finish,
+          this.dataset.alloy,
+          this.dataset.img,
+          this.dataset.id
+        );
+      });
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>{% block title %}AMBERCAST — Handcrafted Brass Metalcraft & Atelier Castings{% endblock %}</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&family=Manrope:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+
+  <style>
+    @layer base {
+      html, body { margin: 0; padding: 0; }
+      body { overscroll-behavior: none; }
+      main > :first-child { margin-top: 0 !important; }
+      main > :last-child { margin-bottom: 0 !important; }
+    }
+    ::-webkit-scrollbar { display: none; }
+    .fill-1 {
+      font-variation-settings: 'FILL' 1;
+    }
+  </style>
+
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "outline-variant": "#d1c5af",
+            "secondary-container": "#ff8843",
+            "tertiary-fixed": "#f8dec9",
+            "inverse-surface": "#31312d",
+            "error-container": "#ffdad6",
+            "inverse-on-surface": "#f3f0ea",
+            "surface-container": "#f0eee8",
+            "on-tertiary-container": "#443526",
+            "surface-bright": "#fcf9f3",
+            "on-surface-variant": "#4e4635",
+            "surface-dim": "#dcdad4",
+            "on-secondary-fixed-variant": "#783100",
+            "primary": "#775a00",
+            "error": "#ba1a1a",
+            "background": "#fcf9f3",
+            "on-tertiary": "#ffffff",
+            "secondary": "#9e4300",
+            "surface-container-low": "#f6f3ed",
+            "surface-tint": "#775a00",
+            "secondary-fixed-dim": "#ffb690",
+            "on-surface": "#1c1c18",
+            "secondary-fixed": "#ffdbcb",
+            "surface-container-lowest": "#ffffff",
+            "on-secondary": "#ffffff",
+            "outline": "#807663",
+            "on-error-container": "#93000a",
+            "on-secondary-container": "#692b00",
+            "inverse-primary": "#eec14b",
+            "primary-container": "#c59b27",
+            "on-primary-fixed-variant": "#5a4300",
+            "on-background": "#1c1c18",
+            "on-error": "#ffffff",
+            "surface-container-highest": "#e5e2dc",
+            "on-primary": "#ffffff",
+            "on-tertiary-fixed-variant": "#554434",
+            "primary-fixed-dim": "#eec14b",
+            "primary-fixed": "#ffdf98",
+            "surface-variant": "#e5e2dc",
+            "surface": "#fcf9f3",
+            "tertiary": "#6e5b4a",
+            "surface-container-high": "#ebe8e2",
+            "on-primary-container": "#473500",
+            "on-secondary-fixed": "#341100",
+            "on-primary-fixed": "#251a00",
+            "tertiary-container": "#b49d8a",
+            "on-tertiary-fixed": "#26190c",
+            "tertiary-fixed-dim": "#dbc2ae"
+          },
+          borderRadius: {
+            DEFAULT: "0.125rem",
+            lg: "0.25rem",
+            xl: "0.5rem",
+            full: "0.75rem"
+          },
+          spacing: {
+            "space-lg": "1.5rem",
+            "gutter": "1.5rem",
+            "space-sm": "0.5rem",
+            "space-xl": "2.5rem",
+            "margin-tablet": "2rem",
+            "margin-mobile": "1rem",
+            "space-md": "1rem",
+            "margin": "3rem",
+            "space-xs": "0.25rem",
+            "gutter-mobile": "1rem"
+          },
+          fontFamily: {
+            "headline-sm": ["EB Garamond", "serif"],
+            "body-md": ["Manrope", "sans-serif"],
+            "label-sm": ["Space Grotesk", "sans-serif"],
+            "label-lg": ["Space Grotesk", "sans-serif"],
+            "body-sm": ["Manrope", "sans-serif"],
+            "display-hero": ["EB Garamond", "serif"],
+            "headline-lg": ["EB Garamond", "serif"],
+            "display-hero-mobile": ["EB Garamond", "serif"],
+            "headline-lg-mobile": ["EB Garamond", "serif"],
+            "label-md": ["Space Grotesk", "sans-serif"],
+            "body-lg": ["Manrope", "sans-serif"],
+            "headline-md": ["EB Garamond", "serif"]
+          },
+          fontSize: {
+            "headline-sm": ["22px", { lineHeight: "28px", fontWeight: "600" }],
+            "body-md": ["15px", { lineHeight: "24px", fontWeight: "400" }],
+            "label-sm": ["10px", { lineHeight: "14px", letterSpacing: "0.1em", fontWeight: "600" }],
+            "label-lg": ["14px", { lineHeight: "20px", letterSpacing: "0.06em", fontWeight: "600" }],
+            "body-sm": ["13px", { lineHeight: "20px", fontWeight: "400" }],
+            "display-hero": ["56px", { lineHeight: "64px", letterSpacing: "-0.02em", fontWeight: "500" }],
+            "headline-lg": ["40px", { lineHeight: "48px", letterSpacing: "-0.01em", fontWeight: "600" }],
+            "display-hero-mobile": ["36px", { lineHeight: "44px", letterSpacing: "-0.01em", fontWeight: "500" }],
+            "headline-lg-mobile": ["28px", { lineHeight: "36px", fontWeight: "600" }],
+            "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.08em", fontWeight: "500" }],
+            "body-lg": ["18px", { lineHeight: "28px", fontWeight: "400" }],
+            "headline-md": ["28px", { lineHeight: "36px", fontWeight: "600" }]
+          }
+        }
+      }
+    };
+  </script>
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-surface font-body-md text-body-md text-on-surface antialiased">
+
+  <!-- Header -->
+  <header class="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(58,43,29,0.04)]">
+    <!-- Top Announcement Strip -->
+    <div class="bg-surface-container-high px-margin-mobile md:px-margin-tablet lg:px-margin text-on-surface-variant flex items-center justify-between text-xs py-1.5">
+      <div class="flex items-center gap-space-sm">
+        <span class="material-symbols-outlined text-sm text-primary">verified</span>
+        <span class="font-label-sm text-label-sm uppercase tracking-wider">Foundry Provenance &amp; Hand-Poured Solid Brass • Heirloom Lifetime Warranty</span>
+      </div>
+      <div class="flex items-center gap-space-lg">
+        <div class="hidden md:flex items-center gap-space-xs font-label-sm text-label-sm">
+          <span class="text-on-surface-variant">CURRENCY:</span>
+          <span class="text-on-surface font-semibold">INR (₹)</span>
+        </div>
+        <a class="flex items-center gap-1 font-label-sm text-label-sm text-secondary hover:text-on-secondary-container transition-colors uppercase font-bold" href="{% url 'atelier_dashboard' %}">
+          <span class="material-symbols-outlined text-sm">admin_panel_settings</span>
+          <span>Atelier Portal</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Main Navigation Bar -->
+    <div class="h-20 max-w-7xl mx-auto px-margin-mobile md:px-margin-tablet lg:px-margin flex items-center justify-between gap-space-md">
+      <!-- Brand Logo -->
+      <a href="{% url 'home' %}" class="flex items-center gap-space-md group">
+        <div class="w-10 h-10 rounded-full bg-primary-container/20 border border-primary flex items-center justify-center text-primary font-serif font-bold text-lg shadow-sm">
+          AC
+        </div>
+        <div class="flex flex-col">
+          <span class="font-headline-sm text-headline-sm tracking-wide text-on-surface font-semibold">AMBERCAST</span>
+          <span class="font-label-sm text-label-sm text-primary uppercase tracking-widest -mt-1 font-semibold">Fine Metalwork &amp; Casting</span>
+        </div>
+      </a>
+
+      <!-- Global Search Bar -->
+      <form action="{% url 'catalog' %}" method="GET" class="hidden lg:flex items-center flex-1 max-w-md mx-space-md bg-surface-container-lowest px-space-md py-space-xs rounded shadow-[0_1px_3px_rgba(58,43,29,0.04)] border border-surface-container-high focus-within:border-primary transition-colors">
+        <span class="material-symbols-outlined text-on-surface-variant mr-space-sm text-lg">search</span>
+        <input type="text" name="q" placeholder="Search brass statues, heirlooms, fittings..." class="font-body-sm text-body-sm text-on-surface bg-transparent outline-none flex-1 placeholder:text-outline-variant" value="{{ search_query|default:'' }}">
+        <button type="submit" class="font-label-sm text-label-sm text-outline px-1.5 py-0.5 bg-surface-container hover:bg-surface-container-high rounded transition-colors">Search</button>
+      </form>
+
+      <!-- Navigation Links -->
+      <nav class="hidden xl:flex items-center gap-space-lg">
+        <a href="{% url 'home' %}" class="font-body-sm text-body-sm {% if request.resolver_match.url_name == 'home' %}text-primary font-semibold underline decoration-primary underline-offset-8{% else %}text-on-surface-variant hover:text-on-surface{% endif %} transition-colors">Home</a>
+        <a href="{% url 'catalog' %}" class="font-body-sm text-body-sm {% if request.resolver_match.url_name == 'catalog' or request.resolver_match.url_name == 'product_detail' %}text-primary font-semibold underline decoration-primary underline-offset-8{% else %}text-on-surface-variant hover:text-on-surface{% endif %} transition-colors">Catalog &amp; Statues</a>
+        <a href="{% url 'heritage_story' %}" class="font-body-sm text-body-sm {% if request.resolver_match.url_name == 'heritage_story' %}text-primary font-semibold underline decoration-primary underline-offset-8{% else %}text-on-surface-variant hover:text-on-surface{% endif %} transition-colors">Heritage Story</a>
+        <a href="{% url 'orders' %}" class="font-body-sm text-body-sm {% if request.resolver_match.url_name == 'orders' or request.resolver_match.url_name == 'order_detail' %}text-primary font-semibold underline decoration-primary underline-offset-8{% else %}text-on-surface-variant hover:text-on-surface{% endif %} transition-colors">Orders</a>
+        <a href="{% url 'reviews' %}" class="font-body-sm text-body-sm {% if request.resolver_match.url_name == 'reviews' %}text-primary font-semibold underline decoration-primary underline-offset-8{% else %}text-on-surface-variant hover:text-on-surface{% endif %} transition-colors">Reviews</a>
+      </nav>
+
+      <!-- User & Cart Controls -->
+      <div class="flex items-center gap-space-md">
+        <!-- Wishlist Icon -->
+        <a href="{% url 'wishlist' %}" class="relative p-space-xs text-on-surface hover:text-primary transition-colors flex items-center justify-center" title="My Wishlist">
+          <span class="material-symbols-outlined text-2xl">favorite</span>
+          <span class="absolute -top-1 -right-1 bg-error text-on-error font-label-sm text-label-sm w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold" id="global-wishlist-badge">{{ wishlist_count|default:0 }}</span>
+        </a>
+
+        <!-- Cart Icon -->
+        <a href="{% url 'cart' %}" class="relative p-space-xs text-on-surface hover:text-primary transition-colors flex items-center justify-center" title="Shopping Cart">
+          <span class="material-symbols-outlined text-2xl">shopping_bag</span>
+          <span class="absolute -top-1 -right-1 bg-secondary text-on-secondary font-label-sm text-label-sm w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold" id="global-cart-badge">{{ cart_count }}</span>
+        </a>
+
+        <div class="h-6 w-px bg-surface-container-highest hidden sm:block"></div>
+
+        <!-- Auth Status -->
+        {% if user.is_authenticated %}
+          <div class="relative group">
+            <button class="flex items-center gap-2 text-on-surface hover:text-primary transition-colors focus:outline-none">
+              <div class="w-8 h-8 rounded-full bg-primary-fixed text-on-primary-fixed flex items-center justify-center font-bold text-xs uppercase shadow-sm">
+                {{ user.first_name|slice:":1"|default:user.email|slice:":1" }}
+              </div>
+              <span class="hidden md:inline font-label-sm text-label-sm uppercase font-semibold">{{ user.first_name|default:"Account" }}</span>
+              <span class="material-symbols-outlined text-sm">expand_more</span>
+            </button>
+            <div class="absolute right-0 top-full mt-2 w-48 bg-surface-container-lowest rounded-xl shadow-xl py-2 hidden group-hover:block border border-surface-container z-50">
+              <a href="{% url 'profile' %}" class="flex items-center gap-2 px-4 py-2 text-xs font-body-sm text-on-surface hover:bg-surface-container-low transition-colors">
+                <span class="material-symbols-outlined text-sm text-primary">person</span> My Profile
+              </a>
+              <a href="{% url 'wishlist' %}" class="flex items-center gap-2 px-4 py-2 text-xs font-body-sm text-on-surface hover:bg-surface-container-low transition-colors">
+                <span class="material-symbols-outlined text-sm text-error">favorite</span> My Wishlist
+              </a>
+              <a href="{% url 'orders' %}" class="flex items-center gap-2 px-4 py-2 text-xs font-body-sm text-on-surface hover:bg-surface-container-low transition-colors">
+                <span class="material-symbols-outlined text-sm text-secondary">receipt_long</span> My Orders
+              </a>
+              {% if user.is_atelier_admin %}
+                <a href="{% url 'atelier_dashboard' %}" class="flex items-center gap-2 px-4 py-2 text-xs font-body-sm text-primary font-semibold hover:bg-surface-container-low transition-colors">
+                  <span class="material-symbols-outlined text-sm">admin_panel_settings</span> Atelier Console
+                </a>
+              {% endif %}
+              <div class="h-px bg-surface-container my-1"></div>
+              <a href="{% url 'logout' %}" class="flex items-center gap-2 px-4 py-2 text-xs font-body-sm text-error hover:bg-error-container/20 transition-colors">
+                <span class="material-symbols-outlined text-sm">logout</span> Logout
+              </a>
+            </div>
+          </div>
+        {% else %}
+          <div class="flex items-center gap-2">
+            <a href="{% url 'login' %}" class="font-label-md text-label-md uppercase text-on-surface hover:text-primary transition-colors px-2 py-1">Login</a>
+            <a href="{% url 'register' %}" class="font-label-md text-label-md uppercase bg-primary text-on-primary px-3 py-1.5 rounded hover:bg-primary-container hover:text-on-primary-container transition-all shadow-sm">Register</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+  </header>
+
+  <!-- Flash Messages Notifications -->
+  {% if messages %}
+    <div class="fixed top-24 right-6 z-50 flex flex-col gap-2 max-w-md">
+      {% for message in messages %}
+        <div class="p-space-md rounded-lg shadow-xl flex items-center justify-between gap-3 text-sm font-body-sm transition-all duration-300 {% if message.tags == 'error' %}bg-error-container text-on-error-container{% elif message.tags == 'success' %}bg-primary text-on-primary{% else %}bg-surface-container-highest text-on-surface{% endif %}">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-lg">
+              {% if message.tags == 'error' %}warning{% elif message.tags == 'success' %}check_circle{% else %}info{% endif %}
+            </span>
+            <span>{{ message }}</span>
+          </div>
+          <button onclick="this.parentElement.remove()" class="text-xs hover:opacity-75">
+            <span class="material-symbols-outlined text-sm">close</span>
+          </button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- Main Content Block -->
+  <main class="w-full pt-20 bg-surface">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="w-full bg-surface-container-low text-on-surface-variant pt-space-xl pb-space-lg border-t border-surface-container-high/60">
+    <div class="max-w-7xl mx-auto px-margin-mobile md:px-margin-tablet lg:px-margin">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-space-xl pb-space-xl">
+        <div class="space-y-space-md">
+          <div class="flex items-center gap-space-sm">
+            <div class="w-7 h-7 rounded-full bg-primary-container/20 border border-primary flex items-center justify-center text-primary font-serif font-bold text-xs">
+              AC
+            </div>
+            <span class="font-headline-sm text-headline-sm text-on-surface font-semibold">AMBERCAST</span>
+          </div>
+          <p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+            Handcrafted sand-cast brass sculptures, temple icons, architectural hardware, and bespoke artisanal metalworks forged in five-millennia tradition.
+          </p>
+          <div class="flex items-center gap-space-sm pt-space-xs">
+            <span class="font-label-sm text-label-sm uppercase bg-surface-container-high text-primary px-2 py-1 rounded font-semibold">100% Solid Foundry Brass</span>
+          </div>
+        </div>
+
+        <div class="space-y-space-sm">
+          <span class="font-label-lg text-label-lg uppercase tracking-wider text-on-surface font-semibold block">Curation</span>
+          <div class="flex flex-col space-y-space-xs font-body-sm text-body-sm">
+            <a class="hover:text-on-surface transition-colors" href="{% url 'catalog' %}?category=Temple+Deities">Deity Statues &amp; Icons</a>
+            <a class="hover:text-on-surface transition-colors" href="{% url 'catalog' %}?category=Ritual+Diyas+%26+Deepams">Ritual Lamps &amp; Diyas</a>
+            <a class="hover:text-on-surface transition-colors" href="{% url 'catalog' %}?category=Water+Urulis+%26+Bowls">Bell Metal &amp; Urulis</a>
+            <a class="hover:text-on-surface transition-colors" href="{% url 'catalog' %}?category=Resonant+Ghanta+Bells">Resonant Temple Bells</a>
+            <a class="hover:text-on-surface transition-colors" href="{% url 'heritage_story' %}">Sand-Casting Method</a>
+          </div>
+        </div>
+
+        <div class="space-y-space-sm">
+          <span class="font-label-lg text-label-lg uppercase tracking-wider text-on-surface font-semibold block">Provenance</span>
+          <div class="flex flex-col space-y-space-xs font-body-sm text-body-sm">
+            <a class="hover:text-on-surface transition-colors" href="{% url 'heritage_story' %}">Artisan Workshop Guild</a>
+            <a class="hover:text-on-surface transition-colors" href="{% url 'orders' %}">Track Foundry Casting</a>
+            <a class="hover:text-on-surface transition-colors" href="{% url 'reviews' %}">Collector Testimonials</a>
+            <a class="hover:text-on-surface transition-colors" href="{% url 'cart' %}">Worldwide Vault Shipping</a>
+            <a class="hover:text-on-surface transition-colors" href="{% url 'atelier_dashboard' %}">Atelier Staff Portal</a>
+          </div>
+        </div>
+
+        <div class="space-y-space-md">
+          <span class="font-label-lg text-label-lg uppercase tracking-wider text-on-surface font-semibold block">Security &amp; Logistics</span>
+          <div class="space-y-space-xs">
+            <div class="flex items-center gap-2 text-on-surface">
+              <span class="material-symbols-outlined text-primary text-base">lock</span>
+              <span class="font-label-md text-label-md">256-Bit Encrypted Payments</span>
+            </div>
+            <div class="flex items-center gap-2 text-on-surface">
+              <span class="material-symbols-outlined text-secondary text-base">local_shipping</span>
+              <span class="font-label-md text-label-md">Insured Dispatch &amp; COD Support</span>
+            </div>
+            <div class="flex items-center gap-2 text-on-surface">
+              <span class="material-symbols-outlined text-primary text-base">verified_user</span>
+              <span class="font-label-md text-label-md">Certificate of Metal Purity</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-space-lg border-t border-surface-container-high/60 flex flex-col md:flex-row items-center justify-between gap-space-md text-xs">
+        <span class="font-body-sm text-body-sm">© {% now "Y" %} AmberCast Atelier Works Ltd. Hand-burnished perfection.</span>
+        <div class="flex items-center gap-space-lg font-label-sm text-label-sm uppercase">
+          <a class="hover:text-on-surface" href="{% url 'heritage_story' %}">Authenticity Guarantee</a>
+          <a class="hover:text-on-surface" href="{% url 'orders' %}">Shipping Terms</a>
+          <a class="text-primary hover:text-on-primary-container font-semibold" href="{% url 'atelier_dashboard' %}">Admin Console</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

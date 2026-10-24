@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}Order Spec {{ order.order_reference }} — AMBERCAST{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-margin-mobile md:px-margin-tablet lg:px-margin py-space-xl">
+  <!-- Top Navigation & Title -->
+  <div class="flex items-center justify-between mb-space-lg">
+    <a href="{% url 'orders' %}" class="inline-flex items-center gap-1 text-primary font-label-md text-label-md uppercase font-semibold hover:underline">
+      <span class="material-symbols-outlined text-sm">arrow_back</span>
+      <span>Back to Orders Ledger</span>
+    </a>
+    <button onclick="window.print()" class="px-3 py-1.5 rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm uppercase font-semibold flex items-center gap-1 border border-surface-container-high">
+      <span class="material-symbols-outlined text-sm">print</span>
+      <span>Print Dossier</span>
+    </button>
+  </div>
+
+  <div class="bg-surface-container-lowest rounded-2xl shadow-xl p-space-lg md:p-space-xl border border-surface-container-high space-y-space-lg">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-space-md border-b border-surface-container gap-2">
+      <div>
+        <span class="font-label-sm text-label-sm uppercase tracking-widest text-primary font-bold">Commission Blueprint</span>
+        <h1 class="font-headline-lg text-headline-lg text-on-surface font-serif mt-0.5">{{ order.order_reference }}</h1>
+        <span class="font-mono text-xs text-on-surface-variant">Allocated on {{ order.order_date|date:"F d, Y &bull; H:i" }} UTC</span>
+      </div>
+      <div class="text-right">
+        <span class="px-3 py-1 rounded text-xs font-label-md uppercase font-bold {% if order.order_status == 'Delivered' %}bg-primary text-on-primary{% elif order.order_status == 'Shipped' %}bg-secondary text-on-secondary{% else %}bg-primary-fixed text-on-primary-fixed{% endif %}">
+          {{ order.order_status }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Foundry Flow Tracking Bar -->
+    <div class="p-space-md bg-surface-container-low rounded-xl border border-surface-container-high space-y-space-sm">
+      <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline block font-semibold">Foundry Commission Timeline</span>
+      <div class="grid grid-cols-4 gap-2 text-center text-xs">
+        <div class="p-2 rounded bg-primary-fixed text-on-primary-fixed font-semibold">
+          <span class="material-symbols-outlined text-base block mx-auto">local_fire_department</span>
+          <span>1. Smelt Pour</span>
+        </div>
+        <div class="p-2 rounded {% if order.order_status == 'Processing' or order.order_status == 'Shipped' or order.order_status == 'Delivered' %}bg-primary-fixed text-on-primary-fixed font-semibold{% else %}bg-surface-container text-outline{% endif %}">
+          <span class="material-symbols-outlined text-base block mx-auto">handyman</span>
+          <span>2. Hand Chasing</span>
+        </div>
+        <div class="p-2 rounded {% if order.order_status == 'Shipped' or order.order_status == 'Delivered' %}bg-primary-fixed text-on-primary-fixed font-semibold{% else %}bg-surface-container text-outline{% endif %}">
+          <span class="material-symbols-outlined text-base block mx-auto">local_shipping</span>
+          <span>3. Armored Transit</span>
+        </div>
+        <div class="p-2 rounded {% if order.order_status == 'Delivered' %}bg-primary text-on-primary font-semibold{% else %}bg-surface-container text-outline{% endif %}">
+          <span class="material-symbols-outlined text-base block mx-auto">verified</span>
+          <span>4. Vault Received</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Items List -->
+    <div class="space-y-space-sm">
+      <h3 class="font-label-lg text-label-lg uppercase text-on-surface font-semibold">Heirloom Line Items</h3>
+      <div class="space-y-2">
+        {% for item in order.items.all %}
+        <div class="flex items-center justify-between p-space-sm bg-surface-container-low rounded border border-surface-container-high">
+          <div class="flex items-center gap-space-sm">
+            <img class="w-14 h-14 object-cover rounded bg-surface-container" src="{{ item.product.primary_image_url }}" alt="{{ item.product.product_name }}">
+            <div>
+              <h4 class="font-headline-sm text-base text-on-surface font-semibold">{{ item.product.product_name }}</h4>
+              <span class="text-xs text-on-surface-variant font-label-sm uppercase">SKU: {{ item.product.sku }} &bull; Quantity: {{ item.quantity }}</span>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="font-headline-sm text-base text-primary font-bold">₹{{ item.subtotal }}</span>
+            <span class="block text-xs text-outline font-mono">@ ₹{{ item.unit_price }}</span>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Coordinates & Ledger -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-space-lg pt-space-sm border-t border-surface-container">
+      <div class="space-y-1 bg-surface-container-low p-space-md rounded border border-surface-container-high">
+        <h4 class="font-label-sm text-label-sm uppercase text-outline font-bold">Delivery Beneficiary</h4>
+        <p class="font-bold text-on-surface">{{ order.first_name }} {{ order.last_name }}</p>
+        <p class="text-body-sm text-on-surface-variant">{{ order.shipping_address }}</p>
+        <p class="font-mono text-xs text-primary pt-1">Tel: +91 {{ order.phone }}</p>
+      </div>
+
+      <div class="space-y-2 bg-surface-container-low p-space-md rounded border border-surface-container-high">
+        <h4 class="font-label-sm text-label-sm uppercase text-outline font-bold">Financial Summary</h4>
+        <div class="flex justify-between text-body-sm">
+          <span class="text-on-surface-variant">Payment Method:</span>
+          <span class="font-bold text-on-surface">{{ order.payment.payment_method|default:order.payment_status }}</span>
+        </div>
+        <div class="flex justify-between text-body-sm">
+          <span class="text-on-surface-variant">Payment Status:</span>
+          <span class="font-bold text-primary">{{ order.payment_status }}</span>
+        </div>
+        <div class="flex justify-between text-body-sm border-t border-surface-container pt-1">
+          <span class="font-bold text-on-surface">Total Amount:</span>
+          <span class="font-headline-sm text-lg font-bold text-primary">₹{{ order.total_amount }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

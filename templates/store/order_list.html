@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}My Orders — AMBERCAST{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-margin-mobile md:px-margin-tablet lg:px-margin py-space-xl">
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md mb-space-lg">
+    <div>
+      <span class="font-label-sm text-label-sm uppercase tracking-widest text-primary font-semibold">Account History</span>
+      <h1 class="font-headline-lg text-headline-lg text-on-surface font-serif mt-1">My Orders</h1>
+      <p class="font-body-sm text-body-sm text-on-surface-variant">Track your orders, delivery status, and certificates of authenticity.</p>
+    </div>
+    <a href="{% url 'catalog' %}" class="px-space-md py-2.5 rounded bg-primary text-on-primary font-label-md text-label-md uppercase font-semibold hover:bg-primary-container hover:text-on-primary-container transition-all shadow-sm w-fit">
+      Browse Catalog
+    </a>
+  </div>
+
+  <div class="bg-surface-container-lowest rounded-xl shadow-md overflow-hidden border border-surface-container-high">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left">
+        <thead class="bg-surface-container text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+          <tr>
+            <th class="py-3.5 px-space-md">Order Ref</th>
+            <th class="py-3.5 px-space-md">Order Date</th>
+            <th class="py-3.5 px-space-md">Total Price</th>
+            <th class="py-3.5 px-space-md">Payment Status</th>
+            <th class="py-3.5 px-space-md">Order Status</th>
+            <th class="py-3.5 px-space-md text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-surface-container text-body-sm text-body-sm">
+          {% for order in orders %}
+          <tr class="hover:bg-surface-container-low transition-colors">
+            <td class="py-4 px-space-md font-mono text-primary font-bold">
+              <a href="{% url 'order_detail' order.id %}" class="hover:underline">{{ order.order_reference }}</a>
+            </td>
+            <td class="py-4 px-space-md font-mono text-xs text-on-surface-variant">
+              {{ order.order_date|date:"M d, Y &bull; H:i" }}
+            </td>
+            <td class="py-4 px-space-md font-headline-sm text-base text-on-surface font-bold">
+              ₹{{ order.total_amount }}
+            </td>
+            <td class="py-4 px-space-md">
+              {% if order.payment_status == 'Paid' %}
+                <span class="px-2.5 py-0.5 text-xs font-label-sm font-bold uppercase rounded bg-surface-container-highest text-primary">
+                  {{ order.payment_status }}
+                </span>
+              {% elif order.payment_status == 'COD' %}
+                <span class="px-2.5 py-0.5 text-xs font-label-sm font-bold uppercase rounded bg-secondary-fixed text-on-secondary-fixed">
+                  COD (Cash on Delivery)
+                </span>
+              {% else %}
+                <span class="px-2.5 py-0.5 text-xs font-label-sm font-bold uppercase rounded bg-error-container text-on-error-container">
+                  Pending
+                </span>
+              {% endif %}
+            </td>
+            <td class="py-4 px-space-md">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-label-sm uppercase font-semibold {% if order.order_status == 'Delivered' %}bg-primary-fixed text-on-primary-fixed{% elif order.order_status == 'Shipped' %}bg-secondary-fixed text-on-secondary-fixed{% else %}bg-surface-container text-on-surface{% endif %}">
+                <span class="w-1.5 h-1.5 rounded-full {% if order.order_status == 'Delivered' %}bg-primary{% elif order.order_status == 'Shipped' %}bg-secondary animate-pulse{% else %}bg-outline{% endif %}"></span>
+
+                {{ order.order_status }}
+              </span>
+            </td>
+            <td class="py-4 px-space-md text-right">
+              <a href="{% url 'order_detail' order.id %}" class="inline-flex items-center gap-1 text-primary font-label-md text-label-md uppercase font-bold hover:underline">
+                <span>View Spec</span>
+                <span class="material-symbols-outlined text-sm">arrow_forward</span>
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="text-center py-12 text-on-surface-variant font-body-sm">
+              <span class="material-symbols-outlined text-4xl text-outline-variant mb-2 block">receipt_long</span>
+              No orders registered yet in this session ledger.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
