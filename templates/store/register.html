@@ -13,7 +13,7 @@
       <p class="font-body-sm text-body-sm text-on-surface-variant">Register to browse and purchase artisanal brass sculptures, track orders, and save your wishlist.</p>
     </div>
 
-    {% if form.errors %}
+    {% if form.errors and not form.first_name.errors and not form.last_name.errors and not form.email.errors and not form.phone.errors and not form.pincode.errors and not form.address.errors and not form.password.errors and not form.confirm_password.errors %}
       <div class="p-space-sm bg-error-container text-on-error-container rounded text-xs">
         <ul class="list-disc pl-4 space-y-1">
           {% for field, errors in form.errors.items %}
@@ -25,48 +25,88 @@
       </div>
     {% endif %}
 
-    <form method="POST" class="space-y-space-md">
+    <form method="POST" id="register-form" novalidate class="space-y-space-md">
       {% csrf_token %}
+      {% if next and next != 'home' %}
+        <input type="hidden" name="next" value="{{ next }}">
+      {% elif request.GET.next %}
+        <input type="hidden" name="next" value="{{ request.GET.next }}">
+      {% endif %}
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
         <div>
-          <label class="block font-label-md text-label-md uppercase text-on-surface-variant font-semibold mb-1">First Name *</label>
+          <label class="block font-label-md text-label-md uppercase text-on-surface-variant font-semibold mb-1" for="{{ form.first_name.id_for_label }}">First Name *</label>
           {{ form.first_name }}
+          <p class="field-error text-error text-xs mt-1 font-body-sm hidden" id="error-first_name"></p>
+          {% if form.first_name.errors %}
+            <p class="text-error text-xs mt-1 font-body-sm">{{ form.first_name.errors.0 }}</p>
+          {% endif %}
         </div>
         <div>
-          <label class="block font-label-md text-label-md uppercase text-on-surface-variant font-semibold mb-1">Last Name *</label>
+          <label class="block font-label-md text-label-md uppercase text-on-surface-variant font-semibold mb-1" for="{{ form.last_name.id_for_label }}">Last Name *</label>
           {{ form.last_name }}
+          <p class="field-error text-error text-xs mt-1 font-body-sm hidden" id="error-last_name"></p>
+          {% if form.last_name.errors %}
+            <p class="text-error text-xs mt-1 font-body-sm">{{ form.last_name.errors.0 }}</p>
+          {% endif %}
         </div>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
         <div>
-          <label class="block font-label-md text-label-md uppercase text-on-surface-variant font-semibold mb-1">Email Address *</label>
+          <label class="block font-label-md text-label-md uppercase text-on-surface-variant font-semibold mb-1" for="{{ form.email.id_for_label }}">Email Address *</label>
           {{ form.email }}
+          <p class="field-error text-error text-xs mt-1 font-body-sm hidden" id="error-email"></p>
+          {% if form.email.errors %}
+            <p class="text-error text-xs mt-1 font-body-sm">{{ form.email.errors.0 }}</p>
+          {% endif %}
         </div>
         <div>
-          <label class="block font-label-md text-label-md uppercase text-on-surface-variant font-semibold mb-1">Contact Telephone *</label>
+          <label class="block font-label-md text-label-md uppercase text-on-surface-variant font-semibold mb-1" for="{{ form.phone.id_for_label }}">Mobile Number (10 Digits) *</label>
           {{ form.phone }}
+          <p class="field-error text-error text-xs mt-1 font-body-sm hidden" id="error-phone"></p>
+          {% if form.phone.errors %}
+            <p class="text-error text-xs mt-1 font-body-sm">{{ form.phone.errors.0 }}</p>
+          {% endif %}
         </div>
       </div>
 
-      <div>
-        <label class="block font-label-md text-label-md uppercase text-on-surface-variant font-semibold mb-1">Delivery Address *</label>
-        {{ form.address }}
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-space-sm">
+        <div class="sm:col-span-2">
+          <label class="block font-label-md text-label-md uppercase text-on-surface-variant font-semibold mb-1" for="{{ form.address.id_for_label }}">Delivery Address *</label>
+          {{ form.address }}
+          <p class="field-error text-error text-xs mt-1 font-body-sm hidden" id="error-address"></p>
+          {% if form.address.errors %}
+            <p class="text-error text-xs mt-1 font-body-sm">{{ form.address.errors.0 }}</p>
+          {% endif %}
+        </div>
+        <div>
+          <label class="block font-label-md text-label-md uppercase text-on-surface-variant font-semibold mb-1" for="{{ form.pincode.id_for_label }}">PIN Code (6 Digits) *</label>
+          {{ form.pincode }}
+          <p class="field-error text-error text-xs mt-1 font-body-sm hidden" id="error-pincode"></p>
+          {% if form.pincode.errors %}
+            <p class="text-error text-xs mt-1 font-body-sm">{{ form.pincode.errors.0 }}</p>
+          {% endif %}
+        </div>
       </div>
 
-      <div>
-        <label class="block font-label-md text-label-md uppercase text-on-surface-variant font-semibold mb-1">Account Type *</label>
-        {{ form.role }}
-      </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
         <div>
-          <label class="block font-label-md text-label-md uppercase text-on-surface-variant font-semibold mb-1">Password *</label>
+          <label class="block font-label-md text-label-md uppercase text-on-surface-variant font-semibold mb-1" for="{{ form.password.id_for_label }}">Password *</label>
           {{ form.password }}
+          <p class="text-[11px] text-on-surface-variant mt-1">Min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char</p>
+          <p class="field-error text-error text-xs mt-1 font-body-sm hidden" id="error-password"></p>
+          {% if form.password.errors %}
+            <p class="text-error text-xs mt-1 font-body-sm">{{ form.password.errors.0 }}</p>
+          {% endif %}
         </div>
         <div>
-          <label class="block font-label-md text-label-md uppercase text-on-surface-variant font-semibold mb-1">Confirm Password *</label>
+          <label class="block font-label-md text-label-md uppercase text-on-surface-variant font-semibold mb-1" for="{{ form.confirm_password.id_for_label }}">Confirm Password *</label>
           {{ form.confirm_password }}
+          <p class="field-error text-error text-xs mt-1 font-body-sm hidden" id="error-confirm_password"></p>
+          {% if form.confirm_password.errors %}
+            <p class="text-error text-xs mt-1 font-body-sm">{{ form.confirm_password.errors.0 }}</p>
+          {% endif %}
         </div>
       </div>
 
@@ -77,8 +117,153 @@
 
     <div class="pt-space-sm border-t border-surface-container text-center text-xs text-on-surface-variant">
       <span>Already have an account?</span>
-      <a href="{% url 'login' %}" class="text-primary font-bold hover:underline ml-1 uppercase font-label-sm">Sign In</a>
+      <a href="{% url 'login' %}{% if next and next != 'home' %}?next={{ next }}{% elif request.GET.next %}?next={{ request.GET.next }}{% endif %}" class="text-primary font-bold hover:underline ml-1 uppercase font-label-sm">Sign In</a>
     </div>
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('register-form');
+  if (!form) return;
+
+  function showError(fieldId, message) {
+    const errEl = document.getElementById('error-' + fieldId);
+    if (errEl) {
+      errEl.textContent = message;
+      errEl.classList.remove('hidden');
+    }
+  }
+
+  function clearErrors() {
+    document.querySelectorAll('.field-error').forEach(el => {
+      el.textContent = '';
+      el.classList.add('hidden');
+    });
+  }
+
+  form.addEventListener('submit', function(e) {
+    clearErrors();
+    let isValid = true;
+
+    // First Name
+    const firstNameInput = document.getElementById('{{ form.first_name.id_for_label }}');
+    if (firstNameInput) {
+      firstNameInput.value = firstNameInput.value.trim();
+      const val = firstNameInput.value;
+      if (!val) {
+        showError('first_name', 'First name is required and cannot be empty.');
+        isValid = false;
+      } else if (!/^[A-Za-z ]+$/.test(val)) {
+        showError('first_name', 'First name can only contain alphabets and spaces.');
+        isValid = false;
+      }
+    }
+
+    // Last Name
+    const lastNameInput = document.getElementById('{{ form.last_name.id_for_label }}');
+    if (lastNameInput) {
+      lastNameInput.value = lastNameInput.value.trim();
+      const val = lastNameInput.value;
+      if (!val) {
+        showError('last_name', 'Last name is required and cannot be empty.');
+        isValid = false;
+      } else if (!/^[A-Za-z ]+$/.test(val)) {
+        showError('last_name', 'Last name can only contain alphabets and spaces.');
+        isValid = false;
+      }
+    }
+
+    // Email
+    const emailInput = document.getElementById('{{ form.email.id_for_label }}');
+    if (emailInput) {
+      emailInput.value = emailInput.value.trim();
+      const val = emailInput.value;
+      if (!val) {
+        showError('email', 'Email address is required.');
+        isValid = false;
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+        showError('email', 'Please enter a valid email address.');
+        isValid = false;
+      }
+    }
+
+    // Phone (10 digits)
+    const phoneInput = document.getElementById('{{ form.phone.id_for_label }}');
+    if (phoneInput) {
+      phoneInput.value = phoneInput.value.trim();
+      const val = phoneInput.value;
+      if (!val) {
+        showError('phone', 'Mobile number is required.');
+        isValid = false;
+      } else if (!/^\d{10}$/.test(val)) {
+        showError('phone', 'Mobile number must be exactly 10 digits without letters or special characters.');
+        isValid = false;
+      }
+    }
+
+    // PIN Code (6 digits)
+    const pincodeInput = document.getElementById('{{ form.pincode.id_for_label }}');
+    if (pincodeInput) {
+      pincodeInput.value = pincodeInput.value.trim();
+      const val = pincodeInput.value;
+      if (!val) {
+        showError('pincode', 'PIN code is required.');
+        isValid = false;
+      } else if (!/^\d{6}$/.test(val)) {
+        showError('pincode', 'PIN code must be exactly 6 digits.');
+        isValid = false;
+      }
+    }
+
+    // Address
+    const addressInput = document.getElementById('{{ form.address.id_for_label }}');
+    if (addressInput) {
+      addressInput.value = addressInput.value.trim();
+      if (!addressInput.value) {
+        showError('address', 'Delivery address is required and cannot be blank.');
+        isValid = false;
+      }
+    }
+
+    // Password - DO NOT TRIM!
+    const passwordInput = document.getElementById('{{ form.password.id_for_label }}');
+    const confirmPasswordInput = document.getElementById('{{ form.confirm_password.id_for_label }}');
+    if (passwordInput) {
+      const pwd = passwordInput.value;
+      if (!pwd || pwd.length < 8) {
+        showError('password', 'Password must be at least 8 characters long.');
+        isValid = false;
+      } else if (!/[A-Z]/.test(pwd)) {
+        showError('password', 'Password must include at least one uppercase letter (A-Z).');
+        isValid = false;
+      } else if (!/[a-z]/.test(pwd)) {
+        showError('password', 'Password must include at least one lowercase letter (a-z).');
+        isValid = false;
+      } else if (!/[0-9]/.test(pwd)) {
+        showError('password', 'Password must include at least one number (0-9).');
+        isValid = false;
+      } else if (!/[^A-Za-z0-9]/.test(pwd)) {
+        showError('password', 'Password must include at least one special character (!@#$%^&*).');
+        isValid = false;
+      }
+    }
+
+    if (passwordInput && confirmPasswordInput) {
+      if (passwordInput.value !== confirmPasswordInput.value) {
+        showError('confirm_password', 'Passwords do not match. Please ensure both passwords match exactly.');
+        isValid = false;
+      }
+    }
+
+    if (!isValid) {
+      e.preventDefault();
+      const firstError = document.querySelector('.field-error:not(.hidden)');
+      if (firstError) {
+        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  });
+});
+</script>
 {% endblock %}

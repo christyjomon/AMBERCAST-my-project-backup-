@@ -25,18 +25,32 @@
     </div>
 
     <!-- Dossier Coordinates -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-space-md py-space-md font-mono text-xs text-on-surface border-b border-surface-container">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md py-space-md font-mono text-xs text-on-surface border-b border-surface-container">
       <div class="bg-surface-container-low p-space-sm rounded">
-        <span class="text-outline block uppercase font-label-sm">Commission Reference</span>
+        <span class="text-outline block uppercase font-label-sm">Order Reference ID</span>
         <span class="font-bold text-primary text-sm">{{ order.order_reference }}</span>
       </div>
       <div class="bg-surface-container-low p-space-sm rounded">
-        <span class="text-outline block uppercase font-label-sm">Registration Timestamp</span>
-        <span class="font-semibold">{{ order.order_date|date:"Y-m-d H:i" }} UTC</span>
+        <span class="text-outline block uppercase font-label-sm">Transaction ID</span>
+        <span class="font-bold text-secondary text-sm break-all">{{ order.payment.transaction_id|default:order.transaction_id|default:"Pending" }}</span>
       </div>
       <div class="bg-surface-container-low p-space-sm rounded">
-        <span class="text-outline block uppercase font-label-sm">Settlement Mode</span>
-        <span class="font-bold text-secondary text-sm">{{ order.payment_status }} ({{ order.payment.payment_method|default:"COD" }})</span>
+        <span class="text-outline block uppercase font-label-sm">Registration Timestamp</span>
+        <span class="font-semibold">{{ order.order_date|date:"Y-m-d H:i" }} IST</span>
+      </div>
+      <div class="bg-surface-container-low p-space-sm rounded">
+        <span class="text-outline block uppercase font-label-sm">Payment Status</span>
+        {% if order.payment_status == 'Paid' %}
+        <span class="inline-flex items-center gap-1 font-bold text-primary text-sm">
+          <span class="w-2 h-2 rounded-full bg-primary"></span>
+          Paid ({{ order.payment.payment_method|default:"Online" }})
+        </span>
+        {% else %}
+        <span class="inline-flex items-center gap-1 font-bold text-secondary text-sm">
+          <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+          Pending (Cash on Delivery)
+        </span>
+        {% endif %}
       </div>
     </div>
 
@@ -108,12 +122,12 @@
         <span>View My Orders</span>
       </a>
       <div class="flex items-center gap-space-sm">
-        <button onclick="window.print()" class="px-space-md py-2.5 rounded bg-surface-container text-on-surface font-label-md text-label-md uppercase font-semibold hover:bg-surface-container-high transition-colors flex items-center gap-1 border border-surface-container-high">
-          <span class="material-symbols-outlined text-base">print</span>
-          <span>Print Certificate</span>
-        </button>
-        <a href="{% url 'catalog' %}" class="px-space-lg py-2.5 rounded bg-primary text-on-primary font-label-md text-label-md uppercase font-bold hover:bg-primary-container hover:text-on-primary-container transition-all shadow-md">
-          Return to Atelier
+        <a href="{% url 'order_invoice' order.id %}" target="_blank" class="px-space-md py-2.5 rounded bg-primary text-on-primary font-label-md text-label-md uppercase font-bold hover:bg-primary-container hover:text-on-primary-container transition-all shadow-md flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-base">download</span>
+          <span>View &amp; Print Invoice</span>
+        </a>
+        <a href="{% url 'catalog' %}" class="px-space-md py-2.5 rounded bg-surface-container text-on-surface font-label-md text-label-md uppercase font-semibold hover:bg-surface-container-high transition-colors flex items-center gap-1 border border-surface-container-high">
+          <span>Return to Atelier</span>
         </a>
       </div>
     </div>

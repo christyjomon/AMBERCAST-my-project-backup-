@@ -127,6 +127,10 @@
           <span class="material-symbols-outlined text-lg">category</span>
           <span class="font-label-md text-label-md">Product Catalog Mgmt</span>
         </a>
+        <a href="{% url 'atelier_users' %}" class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors">
+          <span class="material-symbols-outlined text-lg">group</span>
+          <span class="font-label-md text-label-md">User Accounts</span>
+        </a>
         <a href="{% url 'atelier_analytics' %}" class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors">
           <span class="material-symbols-outlined text-lg">query_stats</span>
           <span class="font-label-md text-label-md">Sales Analytics</span>
@@ -161,11 +165,12 @@
           <table class="w-full text-left">
             <thead class="bg-surface-container text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
               <tr>
-                <th class="py-3 px-space-md">Order Ref</th>
+                <th class="py-3 px-space-md">Order ID</th>
+                <th class="py-3 px-space-md">Transaction ID</th>
                 <th class="py-3 px-space-md">Patron Details</th>
                 <th class="py-3 px-space-md">Date</th>
-                <th class="py-3 px-space-md">Total</th>
-                <th class="py-3 px-space-md">Payment Mode</th>
+                <th class="py-3 px-space-md">Total &amp; GST</th>
+                <th class="py-3 px-space-md">Payment Status</th>
                 <th class="py-3 px-space-md">Fulfillment Stage</th>
                 <th class="py-3 px-space-md text-right">Actions</th>
               </tr>
@@ -174,22 +179,34 @@
               {% for order in orders %}
               <tr class="hover:bg-surface-container-low transition-colors">
                 <td class="py-3 px-space-md font-mono text-primary font-bold text-xs">{{ order.order_reference }}</td>
+                <td class="py-3 px-space-md font-mono text-secondary font-semibold text-xs">{{ order.payment.transaction_id|default:order.transaction_id|default:"Pending" }}</td>
                 <td class="py-3 px-space-md">
                   <div class="font-semibold text-on-surface">{{ order.first_name }} {{ order.last_name }}</div>
-                  <div class="text-xs text-on-surface-variant">{{ order.shipping_address|slice:":40" }}...</div>
+                  <div class="text-xs text-on-surface-variant" title="{{ order.shipping_address }}">{{ order.shipping_address|slice:":35" }}{% if order.shipping_address|length > 35 %}...{% endif %}</div>
+                  <div class="font-mono text-[11px] text-outline">Tel: +91 {{ order.phone }}</div>
+                  <div class="text-[11px] text-secondary font-mono">{{ order.user.email }} (Customer ID: #{{ order.user.id }})</div>
                 </td>
                 <td class="py-3 px-space-md font-mono text-xs text-on-surface-variant">{{ order.order_date|date:"M d, Y" }}</td>
-                <td class="py-3 px-space-md font-semibold text-on-surface">₹{{ order.total_amount }}</td>
                 <td class="py-3 px-space-md">
-
-                  <span class="px-2 py-0.5 text-xs font-label-sm uppercase font-bold rounded {% if order.payment_status == 'Paid' %}bg-surface-container-highest text-primary{% else %}bg-secondary-fixed text-on-secondary-fixed{% endif %}">
-                    {{ order.payment_status }}
-                  </span>
+                  <div class="font-semibold text-on-surface">₹{{ order.total_amount }}</div>
+                  <div class="text-[11px] text-outline font-mono">GST: ₹{{ order.tax_amount }}</div>
+                </td>
+                <td class="py-3 px-space-md">
+                  <form method="POST" action="{% url 'atelier_update_payment_status' order.id %}">
+                    {% csrf_token %}
+                    <select name="payment_status" onchange="this.form.submit()" class="bg-surface-container-high font-mono text-xs px-2 py-1 rounded border border-surface-container-highest font-bold {% if order.payment_status == 'Paid' %}text-primary{% else %}text-secondary{% endif %}">
+                      <option value="Paid" {% if order.payment_status == 'Paid' %}selected{% endif %}>Paid</option>
+                      <option value="Pending" {% if order.payment_status == 'Pending' %}selected{% endif %}>Pending</option>
+                      <option value="Failed" {% if order.payment_status == 'Failed' %}selected{% endif %}>Failed</option>
+                    </select>
+                    <div class="text-[10px] text-outline mt-0.5 font-sans">{{ order.payment.payment_method|default:order.payment_method_name }}</div>
+                  </form>
                 </td>
                 <td class="py-3 px-space-md">
                   <form method="POST" action="{% url 'atelier_update_order_status' order.id %}">
                     {% csrf_token %}
                     <select name="status" onchange="this.form.submit()" class="bg-surface-container-high text-on-surface font-label-md text-xs px-2 py-1 rounded border border-surface-container-highest">
+                      <option value="Pending" {% if order.order_status == 'Pending' %}selected{% endif %}>Pending</option>
                       <option value="Processing" {% if order.order_status == 'Processing' %}selected{% endif %}>Processing</option>
                       <option value="Shipped" {% if order.order_status == 'Shipped' %}selected{% endif %}>Shipped</option>
                       <option value="Delivered" {% if order.order_status == 'Delivered' %}selected{% endif %}>Delivered</option>
@@ -198,9 +215,15 @@
                   </form>
                 </td>
                 <td class="py-3 px-space-md text-right">
-                  <a href="{% url 'order_detail' order.id %}" target="_blank" class="text-primary hover:underline font-label-sm text-label-sm uppercase font-bold">
-                    View Spec
-                  </a>
+                  <div class="flex items-center justify-end gap-2">
+                    <a href="{% url 'order_invoice' order.id %}" target="_blank" class="px-2.5 py-1 rounded bg-primary text-on-primary hover:bg-primary-container text-xs font-mono font-bold transition-all shadow-sm inline-flex items-center gap-1" title="View Full Tax Invoice">
+                      <span class="material-symbols-outlined text-sm">receipt</span>
+                      <span>Invoice</span>
+                    </a>
+                    <a href="{% url 'order_detail' order.id %}" target="_blank" class="text-on-surface hover:text-primary font-label-sm text-label-sm uppercase font-bold hover:underline">
+                      Spec
+                    </a>
+                  </div>
                 </td>
               </tr>
               {% endfor %}

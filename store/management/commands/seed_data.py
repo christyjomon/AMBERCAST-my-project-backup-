@@ -16,7 +16,7 @@ class Command(BaseCommand):
             defaults={
                 "username": "admin",
                 "first_name": "Atelier",
-                "last_name": "Guildmaster",
+                "last_name": "Admin",
                 "phone": "+91 98200 11223",
                 "address": "AmberCast Atelier Foundry, Swamimalai, Tamil Nadu, India",
                 "role": "Admin",
@@ -107,7 +107,7 @@ class Command(BaseCommand):
             {
                 "product_name": "Antique Brass Peacock Uruli",
                 "sku": "SKU-BR-PCK16",
-                "category": "Water Urulis & Bowls",
+                "category": "Temple Deities",
                 "description": "Exquisite heavy antique cast brass peacock uruli water bowl with hand-hammered rim and intricately cast dancing peacock handles. Master burnished golden sheen created using traditional tamarind and wood-ash polishing.",
                 "price": Decimal("380.00"),
                 "original_price": Decimal("440.00"),
@@ -146,7 +146,7 @@ class Command(BaseCommand):
             {
                 "product_name": "Peacock Mayil Kuthu Vilakku Pair",
                 "sku": "SKU-BR-PCK12",
-                "category": "Ritual Diyas & Deepams",
+                "category": "Temple Deities",
                 "description": "Pair of towering South Indian brass Kuthu Vilakku oil lamps with intricate swan and peacock finials, multi-tier oil reservoirs, and heavy fluted base. Designed for five cotton wicks.",
                 "price": Decimal("310.00"),
                 "original_price": Decimal("360.00"),
@@ -166,7 +166,7 @@ class Command(BaseCommand):
             {
                 "product_name": "Gaja Lakshmi Temple Diya",
                 "sku": "SKU-BR-LAK08",
-                "category": "Ritual Diyas & Deepams",
+                "category": "Temple Deities",
                 "description": "Authentic temple architecture lamp featuring twin abhishekam elephants pouring sacred water from pots onto the seated goddess of abundance and auspicious light. Deep oil reservoir and lotus base.",
                 "price": Decimal("250.00"),
                 "original_price": Decimal("295.00"),
@@ -204,7 +204,7 @@ class Command(BaseCommand):
             {
                 "product_name": "Classic Hand-Turned Uruli Bowl",
                 "sku": "SKU-BR-URL02",
-                "category": "Water Urulis & Bowls",
+                "category": "Temple Deities",
                 "description": "Traditional thick-walled Kerala bell metal brass Uruli bowl for auspicious floating jasmine, marigolds, and floating camphor diyas. Heavy rim with hand-turned lathe finish.",
                 "price": Decimal("195.00"),
                 "original_price": Decimal("230.00"),
@@ -243,7 +243,7 @@ class Command(BaseCommand):
             {
                 "product_name": "Garuda Resonant Temple Bell",
                 "sku": "SKU-BR-BEL05",
-                "category": "Resonant Ghanta Bells",
+                "category": "Temple Deities",
                 "description": "Heavy ritual temple hanging ghanta bell featuring winged Garuda finial and ornate heavy brass chain links. Sustained acoustic ringing harmonic tuned at 528 Hz.",
                 "price": Decimal("220.00"),
                 "original_price": Decimal("260.00"),
@@ -263,7 +263,7 @@ class Command(BaseCommand):
             {
                 "product_name": "Sunstone Amber Brass Sconce",
                 "sku": "SKU-BR-9921",
-                "category": "Luminaires",
+                "category": "Temple Deities",
                 "description": "Polished solid brass architectural wall sconce with organic natural amber backplate radiating soft golden illumination. Built with naval brass alloy CuZn40.",
                 "price": Decimal("1450.00"),
                 "original_price": Decimal("1650.00"),
@@ -282,7 +282,7 @@ class Command(BaseCommand):
             {
                 "product_name": "Chased Laurel Cabinet Pull (Pair)",
                 "sku": "SKU-BR-8104",
-                "category": "Cabinetry",
+                "category": "Temple Deities",
                 "description": "Hand-chased brass fluted door handle inlaid with raw inclusions Baltic amber. Cast in solid antique bronze and hand-finished with knurled grip detailing.",
                 "price": Decimal("290.00"),
                 "original_price": Decimal("340.00"),
@@ -301,7 +301,7 @@ class Command(BaseCommand):
             {
                 "product_name": "Apothecary Reliquary Urn",
                 "sku": "SKU-BR-7719",
-                "category": "Water Urulis & Bowls",
+                "category": "Temple Deities",
                 "description": "Heavy luxury cast brass urn vessel with hand-carved translucent cherry amber lid. Created through five weeks of investment casting and manual burnishing.",
                 "price": Decimal("3200.00"),
                 "original_price": Decimal("3600.00"),
@@ -320,7 +320,7 @@ class Command(BaseCommand):
             {
                 "product_name": "Equinoctial Desk Astrolabe",
                 "sku": "SKU-BR-6401",
-                "category": "Timepieces",
+                "category": "Temple Deities",
                 "description": "Minimalist heavy brass desk horological mechanism with amber resin Roman numerals floating within a solid milled brass cage. Functional gear movement.",
                 "price": Decimal("2180.00"),
                 "original_price": Decimal("2450.00"),

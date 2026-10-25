@@ -192,20 +192,8 @@
         <!-- Category Pills -->
         <div class="flex items-center gap-space-sm overflow-x-auto py-1">
           <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline whitespace-nowrap">Instant Views:</span>
-          <a href="{% url 'catalog' %}" class="px-3 py-1.5 rounded-full {% if not selected_category %}bg-secondary-fixed text-on-secondary-fixed font-bold{% else %}bg-surface-container-lowest text-on-surface hover:bg-surface-container-high{% endif %} font-label-sm text-label-sm uppercase tracking-wider whitespace-nowrap shadow-sm border border-surface-container-high">
-            All Castings ({{ products.count }})
-          </a>
-          <a href="{% url 'catalog' %}?category=Temple+Deities" class="px-3 py-1.5 rounded-full {% if selected_category == 'Temple Deities' %}bg-secondary-fixed text-on-secondary-fixed font-bold{% else %}bg-surface-container-lowest text-on-surface hover:bg-surface-container-high{% endif %} font-label-sm text-label-sm uppercase tracking-wider whitespace-nowrap shadow-sm border border-surface-container-high">
-            Temple Deities
-          </a>
-          <a href="{% url 'catalog' %}?category=Ritual+Diyas+%26+Deepams" class="px-3 py-1.5 rounded-full {% if selected_category == 'Ritual Diyas & Deepams' %}bg-secondary-fixed text-on-secondary-fixed font-bold{% else %}bg-surface-container-lowest text-on-surface hover:bg-surface-container-high{% endif %} font-label-sm text-label-sm uppercase tracking-wider whitespace-nowrap shadow-sm border border-surface-container-high">
-            Mayil &amp; Diyas
-          </a>
-          <a href="{% url 'catalog' %}?category=Water+Urulis+%26+Bowls" class="px-3 py-1.5 rounded-full {% if selected_category == 'Water Urulis & Bowls' %}bg-secondary-fixed text-on-secondary-fixed font-bold{% else %}bg-surface-container-lowest text-on-surface hover:bg-surface-container-high{% endif %} font-label-sm text-label-sm uppercase tracking-wider whitespace-nowrap shadow-sm border border-surface-container-high">
-            Water Urulis
-          </a>
-          <a href="{% url 'catalog' %}?category=Resonant+Ghanta+Bells" class="px-3 py-1.5 rounded-full {% if selected_category == 'Resonant Ghanta Bells' %}bg-secondary-fixed text-on-secondary-fixed font-bold{% else %}bg-surface-container-lowest text-on-surface hover:bg-surface-container-high{% endif %} font-label-sm text-label-sm uppercase tracking-wider whitespace-nowrap shadow-sm border border-surface-container-high">
-            Temple Bells
+          <a href="{% url 'catalog' %}?category=Temple+Deities" class="px-3 py-1.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-bold font-label-sm text-label-sm uppercase tracking-wider whitespace-nowrap shadow-sm border border-surface-container-high">
+            Temple Deities ({{ products.count }})
           </a>
         </div>
       </div>
@@ -231,51 +219,19 @@
         <div class="space-y-space-xs">
           <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline block font-semibold">Artisan Classification</span>
           <div class="space-y-1 pt-1">
-            {% for cat_val, cat_label in categories %}
-              <a href="{% url 'catalog' %}?category={{ cat_val|urlencode }}{% if search_query %}&q={{ search_query }}{% endif %}" class="flex items-center justify-between text-body-sm font-body-sm {% if selected_category == cat_val %}bg-primary/10 text-primary font-bold{% else %}text-on-surface hover:bg-surface-container-low{% endif %} px-2 py-1.5 rounded transition-colors">
-                <span>{{ cat_val }}</span>
-                {% if selected_category == cat_val %}
-                  <span class="material-symbols-outlined text-sm text-primary">check</span>
-                {% endif %}
-              </a>
-            {% endfor %}
-          </div>
-        </div>
-
-        <!-- Facet Group 2: Surface Finish / Patina -->
-        <div class="space-y-space-xs">
-          <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline block font-semibold">Surface Patina</span>
-          <div class="grid grid-cols-1 gap-1.5 pt-1">
-            <a href="{% url 'catalog' %}?patina=Antique{% if selected_category %}&category={{ selected_category|urlencode }}{% endif %}" class="flex items-center justify-between px-2.5 py-1.5 rounded {% if selected_patina == 'Antique' %}bg-surface-container-high text-primary font-semibold{% else %}hover:bg-surface-container-low text-on-surface-variant{% endif %} font-body-sm text-body-sm text-left">
-              <span class="flex items-center gap-2">
-                <span class="w-3.5 h-3.5 rounded-full bg-secondary"></span>
-                <span>Antique Brown Patina</span>
-              </span>
-              {% if selected_patina == 'Antique' %}<span class="material-symbols-outlined text-sm text-primary">check</span>{% endif %}
-            </a>
-            <a href="{% url 'catalog' %}?patina=Golden{% if selected_category %}&category={{ selected_category|urlencode }}{% endif %}" class="flex items-center justify-between px-2.5 py-1.5 rounded {% if selected_patina == 'Golden' %}bg-surface-container-high text-primary font-semibold{% else %}hover:bg-surface-container-low text-on-surface-variant{% endif %} font-body-sm text-body-sm text-left">
-              <span class="flex items-center gap-2">
-                <span class="w-3.5 h-3.5 rounded-full bg-primary-fixed-dim"></span>
-                <span>Polished Golden Brass</span>
-              </span>
-              {% if selected_patina == 'Golden' %}<span class="material-symbols-outlined text-sm text-primary">check</span>{% endif %}
-            </a>
-            <a href="{% url 'catalog' %}?patina=Bronze{% if selected_category %}&category={{ selected_category|urlencode }}{% endif %}" class="flex items-center justify-between px-2.5 py-1.5 rounded {% if selected_patina == 'Bronze' %}bg-surface-container-high text-primary font-semibold{% else %}hover:bg-surface-container-low text-on-surface-variant{% endif %} font-body-sm text-body-sm text-left">
-              <span class="flex items-center gap-2">
-                <span class="w-3.5 h-3.5 rounded-full bg-tertiary"></span>
-                <span>Smoked Matte Bronze</span>
-              </span>
-              {% if selected_patina == 'Bronze' %}<span class="material-symbols-outlined text-sm text-primary">check</span>{% endif %}
+            <a href="{% url 'catalog' %}?category=Temple+Deities{% if search_query %}&q={{ search_query }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}" class="flex items-center justify-between text-body-sm font-body-sm bg-primary/10 text-primary font-bold px-2 py-1.5 rounded transition-colors">
+              <span>Temple Deities</span>
+              <span class="material-symbols-outlined text-sm text-primary">check</span>
             </a>
           </div>
         </div>
 
-        <!-- Facet Group 3: Price Range Slider -->
+        <!-- Facet Group 2: Price Range Slider -->
         <form method="GET" action="{% url 'catalog' %}" class="space-y-space-xs">
-          {% if selected_category %}<input type="hidden" name="category" value="{{ selected_category }}">{% endif %}
+          <input type="hidden" name="category" value="Temple Deities">
           {% if search_query %}<input type="hidden" name="q" value="{{ search_query }}">{% endif %}
           <div class="flex items-center justify-between">
-            <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">Max Price</span>
+            <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">Filter by Price</span>
             <span class="font-label-sm text-label-sm text-secondary font-bold" id="price-display">₹{{ max_price }}</span>
           </div>
           <div class="pt-2">
@@ -306,14 +262,12 @@
         <!-- Active Filter Tags Strip -->
         <div class="flex items-center gap-2 flex-wrap text-xs">
           <span class="font-label-sm text-label-sm uppercase text-outline">Active Filters:</span>
-          {% if selected_category %}
+          <span class="bg-surface-container-high text-on-surface px-2.5 py-1 rounded-full flex items-center gap-1 font-label-sm text-label-sm">
+            Category: Temple Deities
+          </span>
+          {% if max_price and max_price != '2500' and max_price != '3500' %}
             <span class="bg-surface-container-high text-on-surface px-2.5 py-1 rounded-full flex items-center gap-1 font-label-sm text-label-sm">
-              {{ selected_category }} <a href="{% url 'catalog' %}" class="hover:text-error">×</a>
-            </span>
-          {% endif %}
-          {% if selected_patina %}
-            <span class="bg-surface-container-high text-on-surface px-2.5 py-1 rounded-full flex items-center gap-1 font-label-sm text-label-sm">
-              Patina: {{ selected_patina }} <a href="{% url 'catalog' %}" class="hover:text-error">×</a>
+              Max Price: ₹{{ max_price }} <a href="{% url 'catalog' %}{% if search_query %}?q={{ search_query }}{% endif %}" class="hover:text-error">×</a>
             </span>
           {% endif %}
           {% if search_query %}
@@ -322,7 +276,7 @@
             </span>
           {% endif %}
           <a href="{% url 'catalog' %}" class="text-secondary hover:underline font-label-sm text-label-sm uppercase tracking-wider font-semibold ml-2">
-            Clear Filters
+            Reset Filters
           </a>
         </div>
 

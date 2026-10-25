@@ -31,8 +31,13 @@
         <tbody class="divide-y divide-surface-container text-body-sm text-body-sm">
           {% for order in orders %}
           <tr class="hover:bg-surface-container-low transition-colors">
-            <td class="py-4 px-space-md font-mono text-primary font-bold">
-              <a href="{% url 'order_detail' order.id %}" class="hover:underline">{{ order.order_reference }}</a>
+            <td class="py-4 px-space-md">
+              <div class="font-mono text-primary font-bold text-sm">
+                <a href="{% url 'order_detail' order.id %}" class="hover:underline">{{ order.order_reference }}</a>
+              </div>
+              <div class="font-mono text-[11px] text-outline mt-0.5">
+                TXN: <span class="text-secondary font-semibold">{{ order.payment.transaction_id|default:order.transaction_id|default:"Pending" }}</span>
+              </div>
             </td>
             <td class="py-4 px-space-md font-mono text-xs text-on-surface-variant">
               {{ order.order_date|date:"M d, Y &bull; H:i" }}
@@ -42,31 +47,44 @@
             </td>
             <td class="py-4 px-space-md">
               {% if order.payment_status == 'Paid' %}
-                <span class="px-2.5 py-0.5 text-xs font-label-sm font-bold uppercase rounded bg-surface-container-highest text-primary">
-                  {{ order.payment_status }}
-                </span>
-              {% elif order.payment_status == 'COD' %}
-                <span class="px-2.5 py-0.5 text-xs font-label-sm font-bold uppercase rounded bg-secondary-fixed text-on-secondary-fixed">
-                  COD (Cash on Delivery)
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-mono font-bold uppercase rounded bg-primary-container/20 text-primary border border-primary/30">
+                  <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                  Paid
                 </span>
               {% else %}
-                <span class="px-2.5 py-0.5 text-xs font-label-sm font-bold uppercase rounded bg-error-container text-on-error-container">
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-mono font-bold uppercase rounded bg-secondary/10 text-secondary border border-secondary/30">
+                  <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
                   Pending
                 </span>
               {% endif %}
             </td>
             <td class="py-4 px-space-md">
-              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-label-sm uppercase font-semibold {% if order.order_status == 'Delivered' %}bg-primary-fixed text-on-primary-fixed{% elif order.order_status == 'Shipped' %}bg-secondary-fixed text-on-secondary-fixed{% else %}bg-surface-container text-on-surface{% endif %}">
-                <span class="w-1.5 h-1.5 rounded-full {% if order.order_status == 'Delivered' %}bg-primary{% elif order.order_status == 'Shipped' %}bg-secondary animate-pulse{% else %}bg-outline{% endif %}"></span>
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-label-sm uppercase font-semibold {% if order.order_status == 'Delivered' %}bg-primary-fixed text-on-primary-fixed{% elif order.order_status == 'Shipped' %}bg-secondary-fixed text-on-secondary-fixed{% elif order.order_status == 'Cancelled' %}bg-error-container text-on-error-container border border-error/30{% else %}bg-surface-container text-on-surface{% endif %}">
+                <span class="w-1.5 h-1.5 rounded-full {% if order.order_status == 'Delivered' %}bg-primary{% elif order.order_status == 'Shipped' %}bg-secondary animate-pulse{% elif order.order_status == 'Cancelled' %}bg-error{% else %}bg-outline{% endif %}"></span>
 
                 {{ order.order_status }}
               </span>
             </td>
             <td class="py-4 px-space-md text-right">
-              <a href="{% url 'order_detail' order.id %}" class="inline-flex items-center gap-1 text-primary font-label-md text-label-md uppercase font-bold hover:underline">
-                <span>View Spec</span>
-                <span class="material-symbols-outlined text-sm">arrow_forward</span>
-              </a>
+              <div class="flex items-center justify-end gap-2.5">
+                {% if order.can_cancel %}
+                <form method="POST" action="{% url 'cancel_order' order.id %}" class="inline" onsubmit="return confirm('Are you sure you want to cancel order {{ order.order_reference }}? This action will restore product quantities to stock.');">
+                  {% csrf_token %}
+                  <button type="submit" class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-error-container/30 text-error hover:bg-error hover:text-on-error font-mono text-xs uppercase font-bold transition-colors border border-error/30" title="Cancel this order">
+                    <span class="material-symbols-outlined text-sm">cancel</span>
+                    <span>Cancel</span>
+                  </button>
+                </form>
+                {% endif %}
+                <a href="{% url 'order_invoice' order.id %}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-surface-container hover:bg-surface-container-high text-primary font-mono text-xs uppercase font-bold transition-colors border border-surface-container-high" title="View & Download Official Tax Invoice">
+                  <span class="material-symbols-outlined text-sm">download</span>
+                  <span>Invoice</span>
+                </a>
+                <a href="{% url 'order_detail' order.id %}" class="inline-flex items-center gap-1 text-on-surface hover:text-primary font-label-md text-label-md uppercase font-bold hover:underline">
+                  <span>Spec</span>
+                  <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                </a>
+              </div>
             </td>
           </tr>
           {% empty %}

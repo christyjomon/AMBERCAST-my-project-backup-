@@ -127,6 +127,10 @@
           <span class="material-symbols-outlined text-lg">category</span>
           <span class="font-label-md text-label-md">Product Catalog Mgmt</span>
         </a>
+        <a href="{% url 'atelier_users' %}" class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors">
+          <span class="material-symbols-outlined text-lg">group</span>
+          <span class="font-label-md text-label-md">User Accounts</span>
+        </a>
         <a href="{% url 'atelier_analytics' %}" class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors">
           <span class="material-symbols-outlined text-lg">query_stats</span>
           <span class="font-label-md text-label-md">Sales Analytics</span>
@@ -150,39 +154,80 @@
       </a>
     </header>
 
-    <main class="pt-20 px-space-xl pb-space-xl space-y-space-xl">
+    <main class="pt-20 px-space-xl pb-space-xl space-y-space-lg">
+      <!-- Django Notification Messages -->
+      {% if messages %}
+      <div class="space-y-2">
+        {% for message in messages %}
+        <div class="p-3 px-4 rounded-lg flex items-center justify-between shadow-sm {% if message.tags == 'error' %}bg-error-container text-on-error-container{% elif message.tags == 'warning' %}bg-secondary-fixed text-on-secondary-fixed{% else %}bg-primary-container/30 text-on-surface border border-primary/30{% endif %}">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-lg">{% if message.tags == 'error' %}error{% else %}check_circle{% endif %}</span>
+            <span class="text-sm font-medium">{{ message }}</span>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
       <div class="flex items-center justify-between">
         <div>
           <h1 class="font-headline-lg text-headline-lg text-on-surface font-serif">Product Catalog Architecture</h1>
           <p class="font-body-sm text-body-sm text-on-surface-variant">View all minted handcrafted artifacts, edit metallurgical specs, and monitor live stock.</p>
         </div>
+        <a href="#new-product-form" class="px-space-md py-2.5 bg-primary text-on-primary font-label-md text-label-md uppercase font-bold rounded shadow-md hover:bg-primary-container transition-all flex items-center gap-2">
+          <span class="material-symbols-outlined text-base">add</span>
+          <span>Add New Product</span>
+        </a>
       </div>
 
-      <!-- Add New Product Form Accordion / Card -->
-      <div class="bg-surface-container-lowest rounded-xl shadow-md p-space-lg border border-surface-container-high">
-        <h2 class="font-headline-sm text-headline-sm text-on-surface mb-2 font-semibold">Mint New Brass Casting</h2>
-        <form method="POST" action="{% url 'atelier_add_product' %}" class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+      <!-- Add New Product Form Card -->
+      <div id="new-product-form" class="bg-surface-container-lowest rounded-xl shadow-md p-space-lg border border-surface-container-high">
+        <div class="flex items-center justify-between mb-space-sm border-b border-surface-container pb-2">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-xl">format_paint</span>
+            <h2 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Mint New Brass Casting</h2>
+          </div>
+          <span class="text-xs uppercase font-label-sm text-outline font-semibold">Catalog Registration</span>
+        </div>
+
+        <form method="POST" action="{% url 'atelier_add_product' %}" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
           {% csrf_token %}
+          <input type="hidden" name="next" value="{% url 'atelier_products' %}">
+
           <div class="md:col-span-2">
-            <label class="block font-label-md text-label-md uppercase font-semibold text-on-surface mb-1">Product Title</label>
+            <label class="block font-label-md text-label-md uppercase font-semibold text-on-surface mb-1">Product Title *</label>
             {{ product_form.product_name }}
+            {% if product_form.product_name.errors %}
+              <p class="text-xs text-error mt-1">{{ product_form.product_name.errors.0 }}</p>
+            {% endif %}
           </div>
           <div>
-            <label class="block font-label-md text-label-md uppercase font-semibold text-on-surface mb-1">Category</label>
+            <label class="block font-label-md text-label-md uppercase font-semibold text-on-surface mb-1">Category *</label>
             {{ product_form.category }}
           </div>
+
           <div>
-            <label class="block font-label-md text-label-md uppercase font-semibold text-on-surface mb-1">Price (USD)</label>
+            <label class="block font-label-md text-label-md uppercase font-semibold text-on-surface mb-1">Price (₹ INR) *</label>
             {{ product_form.price }}
+            {% if product_form.price.errors %}
+              <p class="text-xs text-error mt-1">{{ product_form.price.errors.0 }}</p>
+            {% endif %}
+          </div>
+          <div>
+            <label class="block font-label-md text-label-md uppercase font-semibold text-on-surface mb-1">Original Price (₹)</label>
+            {{ product_form.original_price }}
+            {% if product_form.original_price.errors %}
+              <p class="text-xs text-error mt-1">{{ product_form.original_price.errors.0 }}</p>
+            {% endif %}
           </div>
           <div>
             <label class="block font-label-md text-label-md uppercase font-semibold text-on-surface mb-1">Stock Quantity</label>
             {{ product_form.stock_quantity }}
+            {% if product_form.stock_quantity.errors %}
+              <p class="text-xs text-error mt-1">{{ product_form.stock_quantity.errors.0 }}</p>
+            {% endif %}
           </div>
-          <div>
-            <label class="block font-label-md text-label-md uppercase font-semibold text-on-surface mb-1">Alloy</label>
-            {{ product_form.alloy_blend }}
-          </div>
+
           <div>
             <label class="block font-label-md text-label-md uppercase font-semibold text-on-surface mb-1">Weight</label>
             {{ product_form.weight }}
@@ -192,23 +237,63 @@
             {{ product_form.dimensions }}
           </div>
           <div>
-            <label class="block font-label-md text-label-md uppercase font-semibold text-on-surface mb-1">Image URL</label>
+            <label class="block font-label-md text-label-md uppercase font-semibold text-on-surface mb-1">Alloy Composition</label>
+            {{ product_form.alloy_blend }}
+          </div>
+
+          <div>
+            <label class="block font-label-md text-label-md uppercase font-semibold text-on-surface mb-1">Patina Finish</label>
+            {{ product_form.patina_finish }}
+          </div>
+          <div>
+            <label class="block font-label-md text-label-md uppercase font-semibold text-on-surface mb-1">Image URL (or web link)</label>
             {{ product_form.image_url }}
           </div>
+          <div>
+            <label class="block font-label-md text-label-md uppercase font-semibold text-on-surface mb-1">Or Upload Image File</label>
+            {{ product_form.image_file }}
+          </div>
+
           <div class="md:col-span-3">
             <label class="block font-label-md text-label-md uppercase font-semibold text-on-surface mb-1">Iconography Description</label>
             {{ product_form.description }}
           </div>
-          <div class="md:col-span-3 flex justify-end">
-            <button type="submit" class="px-space-lg py-2.5 bg-primary text-on-primary font-label-md text-label-md uppercase font-bold rounded shadow-md hover:bg-primary-container transition-all">
-              Mint Into Catalog
+
+          <div class="md:col-span-3 flex items-center justify-between pt-2">
+            <label class="flex items-center gap-2 cursor-pointer font-label-md text-label-md font-semibold text-on-surface">
+              {{ product_form.is_available }}
+              <span>Active &amp; Available for Purchase</span>
+            </label>
+            <button type="submit" class="px-space-xl py-2.5 bg-primary text-on-primary font-label-md text-label-md uppercase font-bold rounded shadow-md hover:bg-primary-container transition-all flex items-center gap-2">
+              <span class="material-symbols-outlined text-base">add_circle</span>
+              <span>Mint Into Catalog</span>
             </button>
           </div>
         </form>
       </div>
 
-      <!-- Current Catalog Table -->
+      <!-- Search & Catalog Table -->
       <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden border border-surface-container-high">
+        <!-- Search and Filter Bar -->
+        <div class="p-space-md bg-surface-container-low flex flex-wrap items-center justify-between gap-space-sm border-b border-surface-container">
+          <form method="GET" action="{% url 'atelier_products' %}" class="flex items-center gap-2 flex-1 max-w-md">
+            <div class="relative w-full">
+              <span class="material-symbols-outlined absolute left-3 top-2.5 text-on-surface-variant text-base">search</span>
+              <input type="text" name="q" value="{{ search_query|default:'' }}" placeholder="Search products by title, SKU, or category..." class="w-full bg-surface-container-lowest text-on-surface pl-9 pr-3 py-2 rounded border border-surface-container-high text-sm font-body-sm outline-none focus:ring-1 focus:ring-primary">
+            </div>
+            <button type="submit" class="px-3 py-2 bg-primary text-on-primary text-xs font-label-sm uppercase font-bold rounded">
+              Filter
+            </button>
+            {% if search_query or selected_category %}
+              <a href="{% url 'atelier_products' %}" class="text-xs text-on-surface-variant hover:text-on-surface underline">Clear</a>
+            {% endif %}
+          </form>
+
+          <span class="text-xs font-label-sm font-semibold text-on-surface-variant">
+            Showing {{ products.count }} catalog items
+          </span>
+        </div>
+
         <div class="overflow-x-auto">
           <table class="w-full text-left">
             <thead class="bg-surface-container text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
@@ -218,8 +303,8 @@
                 <th class="py-3 px-space-md">Category</th>
                 <th class="py-3 px-space-md">Price</th>
                 <th class="py-3 px-space-md">Stock</th>
-                <th class="py-3 px-space-md">Alloy Composition</th>
-                <th class="py-3 px-space-md text-right">Store Link</th>
+                <th class="py-3 px-space-md">Status</th>
+                <th class="py-3 px-space-md text-right">Actions</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-surface-container text-body-sm text-body-sm">
@@ -230,18 +315,51 @@
                 </td>
                 <td class="py-3 px-space-md">
                   <div class="font-semibold text-on-surface">{{ prod.product_name }}</div>
-                  <span class="font-mono text-xs text-primary">{{ prod.sku }}</span>
+                  <span class="font-mono text-xs text-primary font-bold">{{ prod.sku }}</span>
                 </td>
                 <td class="py-3 px-space-md">
                   <span class="px-2 py-0.5 rounded bg-surface-container-high text-xs font-label-sm">{{ prod.category }}</span>
                 </td>
                 <td class="py-3 px-space-md font-bold text-on-surface">₹{{ prod.price }}</td>
                 <td class="py-3 px-space-md font-mono font-bold">{{ prod.stock_quantity }} units</td>
-                <td class="py-3 px-space-md text-xs text-on-surface-variant">{{ prod.alloy_blend }}</td>
+                <td class="py-3 px-space-md">
+                  {% if not prod.is_available %}
+                    <span class="px-2 py-0.5 rounded bg-surface-dim text-on-surface-variant text-xs font-label-sm uppercase font-bold">Inactive</span>
+                  {% elif prod.stock_quantity == 0 %}
+                    <span class="px-2 py-0.5 rounded bg-error-container text-on-error-container text-xs font-label-sm uppercase font-bold">Out of Stock</span>
+                  {% elif prod.stock_quantity <= 4 %}
+                    <span class="px-2 py-0.5 rounded bg-secondary-fixed text-on-secondary-fixed text-xs font-label-sm uppercase font-bold">Low Stock</span>
+                  {% else %}
+                    <span class="px-2 py-0.5 rounded bg-primary/10 text-primary text-xs font-label-sm uppercase font-bold">Active</span>
+                  {% endif %}
+                </td>
                 <td class="py-3 px-space-md text-right">
-                  <a href="{% url 'product_detail' prod.id %}" target="_blank" class="text-primary hover:underline font-label-sm text-label-sm uppercase font-bold">
-                    View
-                  </a>
+                  <div class="flex items-center justify-end gap-2">
+                    <a href="{% url 'product_detail' prod.id %}" target="_blank" class="px-2.5 py-1 rounded bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-label-sm uppercase font-semibold flex items-center gap-1" title="View Storefront Page">
+                      <span class="material-symbols-outlined text-sm">visibility</span>
+                      <span>View</span>
+                    </a>
+                    <a href="{% url 'atelier_edit_product' prod.id %}" class="px-2.5 py-1 rounded bg-primary-container text-on-primary-container hover:bg-primary hover:text-on-primary text-xs font-label-sm uppercase font-bold flex items-center gap-1 shadow-sm transition-colors" title="Edit Product Specs & Price">
+                      <span class="material-symbols-outlined text-sm">edit</span>
+                      <span>Edit</span>
+                    </a>
+                    <button type="button" 
+                            data-product-id="{{ prod.id }}" 
+                            data-product-name="{{ prod.product_name }}" 
+                            onclick="openDeleteDialogFromBtn(this)" 
+                            class="px-2.5 py-1 rounded bg-error-container text-on-error-container hover:bg-error hover:text-on-error text-xs font-label-sm uppercase font-bold flex items-center gap-1 transition-colors" 
+                            title="Delete Product">
+                      <span class="material-symbols-outlined text-sm">delete</span>
+                      <span>Delete</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="7" class="py-8 text-center text-on-surface-variant">
+                  <span class="material-symbols-outlined text-4xl block mb-2 text-outline">search_off</span>
+                  No products found matching your search.
                 </td>
               </tr>
               {% endfor %}
@@ -251,5 +369,57 @@
       </div>
     </main>
   </div>
+
+  <!-- Delete Product Modal -->
+  <div id="deleteModal" class="fixed inset-0 z-50 bg-inverse-surface/60 backdrop-blur-sm hidden items-center justify-center p-space-md">
+    <div class="bg-surface-container-lowest w-full max-w-md rounded-2xl p-space-lg shadow-2xl flex flex-col border border-error/30">
+      <div class="flex items-center gap-3 text-error mb-3">
+        <div class="w-10 h-10 rounded-full bg-error-container flex items-center justify-center shrink-0">
+          <span class="material-symbols-outlined text-xl">delete_forever</span>
+        </div>
+        <div>
+          <h3 class="font-headline-sm text-headline-sm font-semibold text-on-surface">Confirm Product Deletion</h3>
+          <p class="text-xs text-on-surface-variant">Permanent Catalog Removal</p>
+        </div>
+      </div>
+      <p class="text-sm text-on-surface-variant mb-space-md">
+        Are you sure you want to permanently delete <span id="deleteProductName" class="font-bold text-on-surface"></span>?
+        This action will permanently delete the product and its associated records from the database and storefront. This action cannot be undone.
+      </p>
+      <form id="deleteForm" method="POST" action="">
+        {% csrf_token %}
+        <div class="flex items-center justify-end gap-2">
+          <button type="button" onclick="closeDeleteDialog()" class="px-space-md py-2 rounded-lg bg-surface-container text-on-surface font-label-md text-label-md uppercase font-semibold hover:bg-surface-container-high">
+            Cancel
+          </button>
+          <button type="submit" class="px-space-md py-2 rounded-lg bg-error text-on-error font-label-md text-label-md uppercase font-bold shadow-md hover:bg-red-700">
+            Confirm Delete
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function openDeleteDialog(productId, productName) {
+      document.getElementById('deleteProductName').innerText = `"${productName}"`;
+      document.getElementById('deleteForm').action = `/atelier/products/delete/${productId}/`;
+      const modal = document.getElementById('deleteModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function openDeleteDialogFromBtn(btn) {
+      const productId = btn.getAttribute('data-product-id');
+      const productName = btn.getAttribute('data-product-name');
+      openDeleteDialog(productId, productName);
+    }
+
+    function closeDeleteDialog() {
+      const modal = document.getElementById('deleteModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+  </script>
 </body>
 </html>

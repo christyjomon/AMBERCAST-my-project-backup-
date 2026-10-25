@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>AMBERCAST — User Profile Administration</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&family=Manrope:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "outline-variant": "#d1c5af",
+            "secondary-container": "#ff8843",
+            "tertiary-fixed": "#f8dec9",
+            "inverse-surface": "#31312d",
+            "error-container": "#ffdad6",
+            "inverse-on-surface": "#f3f0ea",
+            "surface-container": "#f0eee8",
+            "on-tertiary-container": "#443526",
+            "surface-bright": "#fcf9f3",
+            "on-surface-variant": "#4e4635",
+            "surface-dim": "#dcdad4",
+            "on-secondary-fixed-variant": "#783100",
+            "primary": "#775a00",
+            "error": "#ba1a1a",
+            "background": "#fcf9f3",
+            "on-tertiary": "#ffffff",
+            "secondary": "#9e4300",
+            "surface-container-low": "#f6f3ed",
+            "surface-tint": "#775a00",
+            "secondary-fixed-dim": "#ffb690",
+            "on-surface": "#1c1c18",
+            "secondary-fixed": "#ffdbcb",
+            "surface-container-lowest": "#ffffff",
+            "on-secondary": "#ffffff",
+            "outline": "#807663",
+            "on-error-container": "#93000a",
+            "on-secondary-container": "#692b00",
+            "inverse-primary": "#eec14b",
+            "primary-container": "#c59b27",
+            "on-primary-fixed-variant": "#5a4300",
+            "on-background": "#1c1c18",
+            "on-error": "#ffffff",
+            "surface-container-highest": "#e5e2dc",
+            "on-primary": "#ffffff",
+            "on-tertiary-fixed-variant": "#554434",
+            "primary-fixed-dim": "#eec14b",
+            "primary-fixed": "#ffdf98",
+            "surface-variant": "#e5e2dc",
+            "surface": "#fcf9f3",
+            "tertiary": "#6e5b4a",
+            "surface-container-high": "#ebe8e2",
+            "on-primary-container": "#473500",
+            "on-secondary-fixed": "#341100",
+            "on-primary-fixed": "#251a00",
+            "tertiary-container": "#b49d8a",
+            "on-tertiary-fixed": "#26190c",
+            "tertiary-fixed-dim": "#dbc2ae"
+          },
+          fontFamily: {
+            "headline-sm": ["EB Garamond", "serif"],
+            "body-md": ["Manrope", "sans-serif"],
+            "label-sm": ["Space Grotesk", "sans-serif"],
+            "label-lg": ["Space Grotesk", "sans-serif"],
+            "body-sm": ["Manrope", "sans-serif"],
+            "display-hero": ["EB Garamond", "serif"],
+            "headline-lg": ["EB Garamond", "serif"],
+            "label-md": ["Space Grotesk", "sans-serif"],
+            "body-lg": ["Manrope", "sans-serif"],
+            "headline-md": ["EB Garamond", "serif"]
+          },
+          spacing: {
+            "space-lg": "1.5rem",
+            "gutter": "1.5rem",
+            "space-sm": "0.5rem",
+            "space-xl": "2.5rem",
+            "margin-tablet": "2rem",
+            "margin-mobile": "1rem",
+            "space-md": "1rem",
+            "margin": "3rem",
+            "space-xs": "0.25rem",
+            "gutter-mobile": "1rem"
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-surface font-body-md text-body-md text-on-surface antialiased">
+  <!-- Fixed Left Sidebar Rail -->
+  <aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-low z-50 flex flex-col justify-between py-space-md shadow-[0_1px_8px_rgba(58,43,29,0.04)] border-r border-surface-container-high">
+    <div class="flex flex-col">
+      <div class="px-space-md pb-space-lg flex items-center justify-between border-b border-surface-container">
+        <div class="flex items-center gap-space-sm">
+          <div class="w-9 h-9 rounded-full bg-primary-container/20 border border-primary flex items-center justify-center text-primary font-serif font-bold text-base shadow-sm">
+            AC
+          </div>
+          <div class="flex flex-col">
+            <span class="font-headline-sm text-headline-sm text-on-surface font-semibold">AMBERCAST</span>
+            <span class="font-label-sm text-label-sm text-primary uppercase font-bold">Admin Console</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="px-space-md my-space-sm">
+        <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Management Suite</span>
+      </div>
+
+      <nav class="px-space-sm flex flex-col gap-1">
+        <a href="{% url 'atelier_dashboard' %}" class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors">
+          <span class="material-symbols-outlined text-lg">warehouse</span>
+          <span class="font-label-md text-label-md">Inventory &amp; Ingot Stock</span>
+        </a>
+        <a href="{% url 'atelier_orders' %}" class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors">
+          <span class="material-symbols-outlined text-lg">local_shipping</span>
+          <span class="font-label-md text-label-md">Order Fulfillment</span>
+        </a>
+        <a href="{% url 'atelier_products' %}" class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors">
+          <span class="material-symbols-outlined text-lg">category</span>
+          <span class="font-label-md text-label-md">Product Catalog Mgmt</span>
+        </a>
+        <a href="{% url 'atelier_users' %}" class="flex items-center gap-space-sm px-space-md py-space-sm transition-colors bg-primary-container text-on-primary-container font-semibold rounded-lg shadow-sm">
+          <span class="material-symbols-outlined text-lg">group</span>
+          <span class="font-label-md text-label-md">User Accounts</span>
+        </a>
+        <a href="{% url 'atelier_analytics' %}" class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors">
+          <span class="material-symbols-outlined text-lg">query_stats</span>
+          <span class="font-label-md text-label-md">Sales Analytics</span>
+        </a>
+      </nav>
+    </div>
+
+    <div class="px-space-md pt-space-md flex flex-col gap-space-sm border-t border-surface-container">
+      <a class="flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-surface-container-lowest text-on-surface hover:bg-surface-container-highest hover:text-on-surface transition-colors font-label-md text-label-md uppercase tracking-wider border border-surface-container shadow-sm font-semibold" href="{% url 'home' %}">
+        <span class="material-symbols-outlined text-sm">storefront</span>
+        <span>Switch to Store</span>
+      </a>
+    </div>
+  </aside>
+
+  <div class="pl-72">
+    <header class="fixed top-0 left-72 right-0 h-16 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(58,43,29,0.04)] z-40 flex items-center justify-between px-space-lg border-b border-surface-container-high">
+      <span class="font-headline-sm text-base text-on-surface font-semibold">User Profile &amp; Patron Administration</span>
+      <a href="{% url 'atelier_dashboard' %}" class="text-primary font-label-sm text-label-sm uppercase font-bold hover:underline">
+        &larr; Return to Dashboard
+      </a>
+    </header>
+
+    <main class="pt-20 px-space-xl pb-space-xl space-y-space-lg">
+      <!-- Django Notification Messages -->
+      {% if messages %}
+      <div class="space-y-2">
+        {% for message in messages %}
+        <div class="p-3 px-4 rounded-lg flex items-center justify-between shadow-sm {% if message.tags == 'error' %}bg-error-container text-on-error-container{% elif message.tags == 'warning' %}bg-secondary-fixed text-on-secondary-fixed{% else %}bg-primary-container/30 text-on-surface border border-primary/30{% endif %}">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-lg">{% if message.tags == 'error' %}error{% else %}check_circle{% endif %}</span>
+            <span class="text-sm font-medium">{{ message }}</span>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="font-headline-lg text-headline-lg text-on-surface font-serif">Customer &amp; Administrator Accounts</h1>
+          <p class="font-body-sm text-body-sm text-on-surface-variant">Oversee user profiles, update credentials, change roles, or remove accounts from the website.</p>
+        </div>
+      </div>
+
+      <!-- Quick Summary Stats -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-space-md">
+        <div class="bg-surface-container-lowest p-space-md rounded-xl border border-surface-container-high shadow-sm flex items-center justify-between">
+          <div>
+            <span class="text-xs uppercase font-label-sm text-outline font-bold">Total Accounts</span>
+            <div class="text-2xl font-bold font-headline-sm text-on-surface mt-1">{{ total_count }}</div>
+          </div>
+          <div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary">
+            <span class="material-symbols-outlined text-xl">group</span>
+          </div>
+        </div>
+
+        <div class="bg-surface-container-lowest p-space-md rounded-xl border border-surface-container-high shadow-sm flex items-center justify-between">
+          <div>
+            <span class="text-xs uppercase font-label-sm text-outline font-bold">Patrons / Customers</span>
+            <div class="text-2xl font-bold font-headline-sm text-primary mt-1">{{ customer_count }}</div>
+          </div>
+          <div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary">
+            <span class="material-symbols-outlined text-xl">person</span>
+          </div>
+        </div>
+
+        <div class="bg-surface-container-lowest p-space-md rounded-xl border border-surface-container-high shadow-sm flex items-center justify-between">
+          <div>
+            <span class="text-xs uppercase font-label-sm text-outline font-bold">Administrators &amp; Staff</span>
+            <div class="text-2xl font-bold font-headline-sm text-secondary mt-1">{{ admin_count }}</div>
+          </div>
+          <div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-secondary">
+            <span class="material-symbols-outlined text-xl">admin_panel_settings</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Users Table Card -->
+      <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden border border-surface-container-high">
+        <!-- Search and Filter Toolbar -->
+        <div class="p-space-md bg-surface-container-low flex flex-wrap items-center justify-between gap-space-sm border-b border-surface-container">
+          <form method="GET" action="{% url 'atelier_users' %}" class="flex items-center gap-2 flex-1 max-w-lg">
+            <div class="relative w-full">
+              <span class="material-symbols-outlined absolute left-3 top-2.5 text-on-surface-variant text-base">search</span>
+              <input type="text" name="q" value="{{ search_query|default:'' }}" placeholder="Search by name, email, or phone..." class="w-full bg-surface-container-lowest text-on-surface pl-9 pr-3 py-2 rounded border border-surface-container-high text-sm font-body-sm outline-none focus:ring-1 focus:ring-primary">
+            </div>
+
+            <select name="role" onchange="this.form.submit()" class="bg-surface-container-lowest text-on-surface border border-surface-container-high text-xs font-label-sm px-3 py-2 rounded outline-none focus:ring-1 focus:ring-primary">
+              <option value="ALL" {% if not selected_role or selected_role == 'ALL' %}selected{% endif %}>All Roles</option>
+              <option value="Customer" {% if selected_role == 'Customer' %}selected{% endif %}>Customers</option>
+              <option value="Admin" {% if selected_role == 'Admin' %}selected{% endif %}>Admins</option>
+              <option value="Staff" {% if selected_role == 'Staff' %}selected{% endif %}>Staff Accounts</option>
+            </select>
+
+            <button type="submit" class="px-3 py-2 bg-primary text-on-primary text-xs font-label-sm uppercase font-bold rounded">
+              Filter
+            </button>
+            {% if search_query or selected_role %}
+              <a href="{% url 'atelier_users' %}" class="text-xs text-on-surface-variant hover:text-on-surface underline">Clear</a>
+            {% endif %}
+          </form>
+
+          <span class="text-xs font-label-sm font-semibold text-on-surface-variant">
+            Displaying {{ users.count }} user profiles
+          </span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead class="bg-surface-container text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+              <tr>
+                <th class="py-3 px-space-md">Patron Profile</th>
+                <th class="py-3 px-space-md">Contact</th>
+                <th class="py-3 px-space-md">Role &amp; Permissions</th>
+                <th class="py-3 px-space-md">Account Status</th>
+                <th class="py-3 px-space-md">Registered</th>
+                <th class="py-3 px-space-md">Orders</th>
+                <th class="py-3 px-space-md text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-surface-container text-body-sm text-body-sm">
+              {% for u in users %}
+              <tr class="hover:bg-surface-container-low transition-colors {% if u.id == request.user.id %}bg-primary/5{% endif %}">
+                <td class="py-3.5 px-space-md">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full {% if u.is_staff or u.role == 'Admin' %}bg-primary text-on-primary{% else %}bg-surface-container text-primary{% endif %} font-bold text-sm flex items-center justify-center shrink-0 border border-surface-container-high">
+                      {{ u.first_name|default:u.email|slice:":1"|upper }}
+                    </div>
+                    <div>
+                      <div class="font-semibold text-on-surface flex items-center gap-2">
+                        <span>{{ u.first_name }} {{ u.last_name }}</span>
+                        {% if u.id == request.user.id %}
+                          <span class="text-[10px] font-mono uppercase bg-primary-container text-on-primary-container px-1.5 py-0.2 rounded font-bold">You</span>
+                        {% endif %}
+                      </div>
+                      <span class="text-xs text-on-surface-variant font-mono">{{ u.email }}</span>
+                    </div>
+                  </div>
+                </td>
+
+                <td class="py-3.5 px-space-md text-xs font-mono text-on-surface">
+                  {{ u.phone|default:"—" }}
+                </td>
+
+                <td class="py-3.5 px-space-md">
+                  <div class="flex flex-wrap items-center gap-1">
+                    {% if u.role == 'Admin' or u.is_staff or u.is_superuser %}
+                      <span class="px-2 py-0.5 rounded bg-primary text-on-primary text-xs font-label-sm uppercase font-bold flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[13px]">shield</span>
+                        <span>Administrator</span>
+                      </span>
+                    {% else %}
+                      <span class="px-2 py-0.5 rounded bg-surface-container-high text-on-surface text-xs font-label-sm uppercase font-semibold">
+                        Customer
+                      </span>
+                    {% endif %}
+                    {% if u.is_superuser %}
+                      <span class="px-1.5 py-0.5 rounded bg-secondary-fixed text-on-secondary-fixed text-[10px] font-mono uppercase font-bold">Superuser</span>
+                    {% endif %}
+                  </div>
+                </td>
+
+                <td class="py-3.5 px-space-md">
+                  {% if u.is_active %}
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-label-sm uppercase font-bold bg-primary/10 text-primary">
+                      <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>Active
+                    </span>
+                  {% else %}
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-label-sm uppercase font-bold bg-surface-dim text-on-surface-variant">
+                      <span class="w-1.5 h-1.5 rounded-full bg-outline"></span>Deactivated
+                    </span>
+                  {% endif %}
+                </td>
+
+                <td class="py-3.5 px-space-md text-xs text-on-surface-variant font-mono">
+                  {{ u.date_joined|date:"d M Y" }}
+                </td>
+
+                <td class="py-3.5 px-space-md font-mono text-xs font-bold text-on-surface">
+                  {{ u.orders.count }}
+                </td>
+
+                <td class="py-3.5 px-space-md text-right">
+                  <div class="flex items-center justify-end gap-2">
+                    <a href="{% url 'atelier_edit_user' u.id %}" class="px-2.5 py-1 rounded bg-primary-container text-on-primary-container hover:bg-primary hover:text-on-primary text-xs font-label-sm uppercase font-bold flex items-center gap-1 shadow-sm transition-colors" title="Edit User Profile &amp; Role">
+                      <span class="material-symbols-outlined text-sm">edit</span>
+                      <span>Edit</span>
+                    </a>
+                    
+                    {% if u.id == request.user.id %}
+                      <span class="px-2.5 py-1 rounded bg-surface-container text-outline text-xs font-label-sm uppercase font-semibold cursor-not-allowed" title="Cannot delete current session">
+                        Self
+                      </span>
+                    {% else %}
+                      <button type="button" 
+                              data-user-id="{{ u.id }}" 
+                              data-user-email="{{ u.email }}" 
+                              data-user-name="{{ u.first_name|default:u.username }}" 
+                              onclick="openDeleteUserModalFromBtn(this)" 
+                              class="px-2.5 py-1 rounded bg-error-container text-on-error-container hover:bg-error hover:text-on-error text-xs font-label-sm uppercase font-bold flex items-center gap-1 transition-colors" 
+                              title="Delete User Account">
+                        <span class="material-symbols-outlined text-sm">person_remove</span>
+                        <span>Delete</span>
+                      </button>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="7" class="py-8 text-center text-on-surface-variant">
+                  <span class="material-symbols-outlined text-4xl block mb-2 text-outline">group_off</span>
+                  No user accounts found matching your query.
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Delete User Confirmation Modal -->
+  <div id="deleteUserModal" class="fixed inset-0 z-50 bg-inverse-surface/60 backdrop-blur-sm hidden items-center justify-center p-space-md">
+    <div class="bg-surface-container-lowest w-full max-w-md rounded-2xl p-space-lg shadow-2xl flex flex-col border border-error/30">
+      <div class="flex items-center gap-3 text-error mb-3">
+        <div class="w-10 h-10 rounded-full bg-error-container flex items-center justify-center shrink-0">
+          <span class="material-symbols-outlined text-xl">person_remove</span>
+        </div>
+        <div>
+          <h3 class="font-headline-sm text-headline-sm font-semibold text-on-surface">Delete User Account</h3>
+          <p class="text-xs text-on-surface-variant">Permanent User Profile Removal</p>
+        </div>
+      </div>
+      <p class="text-sm text-on-surface-variant mb-space-md">
+        Are you sure you want to delete user account <span id="deleteUserEmail" class="font-bold text-on-surface"></span>?
+        All profile data, saved carts, and wishlist items for this user will be removed from the website.
+      </p>
+      <form id="deleteUserForm" method="POST" action="">
+        {% csrf_token %}
+        <div class="flex items-center justify-end gap-2">
+          <button type="button" onclick="closeDeleteUserModal()" class="px-space-md py-2 rounded-lg bg-surface-container text-on-surface font-label-md text-label-md uppercase font-semibold hover:bg-surface-container-high">
+            Cancel
+          </button>
+          <button type="submit" class="px-space-md py-2 rounded-lg bg-error text-on-error font-label-md text-label-md uppercase font-bold shadow-md hover:bg-red-700">
+            Confirm Delete User
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function openDeleteUserModal(userId, userEmail, userName) {
+      document.getElementById('deleteUserEmail').innerText = `"${userEmail}" (${userName})`;
+      document.getElementById('deleteUserForm').action = `/atelier/users/delete/${userId}/`;
+      const modal = document.getElementById('deleteUserModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function openDeleteUserModalFromBtn(btn) {
+      const userId = btn.getAttribute('data-user-id');
+      const userEmail = btn.getAttribute('data-user-email');
+      const userName = btn.getAttribute('data-user-name');
+      openDeleteUserModal(userId, userEmail, userName);
+    }
+
+    function closeDeleteUserModal() {
+      const modal = document.getElementById('deleteUserModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+  </script>
+</body>
+</html>

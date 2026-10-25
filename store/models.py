@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 from decimal import Decimal
@@ -22,37 +22,38 @@ class User(AbstractUser):
 
     @property
     def is_atelier_admin(self):
-        return self.role == 'Admin' or self.is_staff or self.is_superuser
+        return (self.role == 'Admin' or self.is_staff or self.is_superuser) and self.is_active
+
+    def has_purchased_product(self, product):
+        """Verify customer has actually purchased this specific product."""
+        if not self.is_authenticated:
+            return False
+        return self.orders.filter(
+            items__product=product
+        ).exclude(order_status='Cancelled').exclude(payment_status='Failed').exists()
 
 
 class Product(models.Model):
     CATEGORY_CHOICES = (
-        ('Temple Deities', 'Temple Deities & Idols'),
-        ('Ritual Diyas & Deepams', 'Oil Lamps, Diyas & Deepams'),
-        ('Water Urulis & Bowls', 'Bell Metal & Urulis'),
-        ('Resonant Ghanta Bells', 'Resonant Ghanta Bells'),
-        ('Architectural Artifacts', 'Antique Decor & Wall Art'),
-        ('Luminaires', 'Luminaires & Sconces'),
-        ('Cabinetry', 'Cabinetry Pulls & Hardware'),
-        ('Timepieces', 'Horology & Accents'),
+        ('Temple Deities', 'Temple Deities'),
     )
 
     product_name = models.CharField(max_length=150, help_text="Name of the handcrafted brass product")
     sku = models.CharField(max_length=50, unique=True, help_text="Unique artisan inventory SKU code")
     category = models.CharField(max_length=100, choices=CATEGORY_CHOICES, default='Temple Deities')
-    description = models.TextField(help_text="Detailed product description and iconography notes")
-    price = models.DecimalField(max_digits=10, decimal_places=2, help_text="Current selling price in USD")
+    description = models.TextField(help_text="Detailed product description and iconography notes", blank=True, default="")
+    price = models.DecimalField(max_digits=10, decimal_places=2, help_text="Current selling price in INR")
     original_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Original retail price before guild privilege")
     stock_quantity = models.IntegerField(default=0, help_text="Available quantity in stock")
     is_available = models.BooleanField(default=True, help_text="Indicates whether the product can be purchased")
     
     # Artisanal Specifications
-    weight = models.CharField(max_length=50, default="3.5 kg", help_text="Physical weight (e.g. 4.2 kg)")
-    dimensions = models.CharField(max_length=100, default='14" x 10"', help_text='Dimensions (e.g. 18.5" x 14.2")')
-    alloy_blend = models.CharField(max_length=120, default="85-88% Copper CuZn Solid Brass", help_text="Metallurgical alloy composition")
-    patina_finish = models.CharField(max_length=100, default="Antique Brown Patina", help_text="Surface finish/patina")
-    casting_technique = models.CharField(max_length=120, default="Lost-Wax Sand Casting (Cire Perdue)", help_text="Foundry technique")
-    provenance = models.CharField(max_length=150, default="Swamimalai / Thanjavur Bronze Guild", help_text="Artisanal guild provenance")
+    weight = models.CharField(max_length=50, default="3.5 kg", blank=True, help_text="Physical weight (e.g. 4.2 kg)")
+    dimensions = models.CharField(max_length=100, default='14" x 10"', blank=True, help_text='Dimensions (e.g. 18.5" x 14.2")')
+    alloy_blend = models.CharField(max_length=120, default="85-88% Copper CuZn Solid Brass", blank=True, help_text="Metallurgical alloy composition")
+    patina_finish = models.CharField(max_length=100, default="Antique Brown Patina", blank=True, help_text="Surface finish/patina")
+    casting_technique = models.CharField(max_length=120, default="Lost-Wax Sand Casting (Cire Perdue)", blank=True, help_text="Foundry technique")
+    provenance = models.CharField(max_length=150, default="Swamimalai / Thanjavur Bronze Guild", blank=True, help_text="Artisanal guild provenance")
     is_featured = models.BooleanField(default=False, help_text="Display on storefront hero showcase")
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -89,6 +90,11 @@ class Product(models.Model):
         inv, _ = Inventory.objects.get_or_create(product=self)
         inv.quantity_available = self.stock_quantity
         inv.save()
+
+    def save(self, *args, **kwargs):
+        if not self.category or self.category != 'Temple Deities':
+            self.category = 'Temple Deities'
+        super().save(*args, **kwargs)
 
 
 class ProductImage(models.Model):
@@ -151,6 +157,7 @@ class Order(models.Model):
     )
 
     ORDER_STATUS_CHOICES = (
+        ('Pending', 'Pending'),
         ('Processing', 'Processing'),
         ('Shipped', 'Shipped'),
         ('Delivered', 'Delivered'),
@@ -170,6 +177,7 @@ class Order(models.Model):
     discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
     payment_status = models.CharField(max_length=30, choices=PAYMENT_STATUS_CHOICES, default='Pending')
     order_status = models.CharField(max_length=30, choices=ORDER_STATUS_CHOICES, default='Processing')
+    stock_restored = models.BooleanField(default=False, help_text="Indicates whether inventory stock was restored after order cancellation")
 
     class Meta:
         ordering = ['-order_date']
@@ -177,16 +185,76 @@ class Order(models.Model):
     def __str__(self):
         return f"{self.order_reference} - {self.user.email}"
 
+    @property
+    def can_cancel(self):
+        """Customers can only cancel their order when status is Pending or Processing."""
+        return self.order_status in ['Pending', 'Processing']
+
+    def cancel_order(self):
+        """
+        Cancels the order and restores exact product quantities to inventory.
+        Guarantees that stock restoration happens exactly once.
+        Returns: tuple (success: bool, message: str)
+        """
+        if not self.can_cancel:
+            if self.order_status == 'Cancelled':
+                return False, f"Order {self.order_reference} is already cancelled."
+            return False, f"Order {self.order_reference} cannot be cancelled because it has already been {self.order_status.lower()}."
+
+        with transaction.atomic():
+            if not self.stock_restored:
+                for item in self.items.select_related('product').all():
+                    if item.product:
+                        # Lock and update product stock
+                        product = Product.objects.select_for_update().get(pk=item.product.pk)
+                        product.stock_quantity += item.quantity
+                        product.save()
+                        product.sync_inventory()
+                self.stock_restored = True
+
+            self.order_status = 'Cancelled'
+            # If payment was pending, update payment status
+            if self.payment_status in ['Pending', 'COD']:
+                self.payment_status = 'Failed'
+                if hasattr(self, 'payment') and self.payment:
+                    self.payment.payment_status = 'Failed'
+                    self.payment.save()
+            self.save()
+
+        return True, f"Order {self.order_reference} has been cancelled successfully. Product stock has been restored to inventory."
+
+    @property
+    def transaction_id(self):
+        if hasattr(self, 'payment') and self.payment and self.payment.transaction_id:
+            return self.payment.transaction_id
+        return None
+
+    @property
+    def invoice_number(self):
+        ref = self.order_reference.replace('#', '').strip()
+        return f"INV-{ref}"
+
+    @property
+    def is_paid(self):
+        return self.payment_status == 'Paid'
+
+    @property
+    def payment_method_name(self):
+        if hasattr(self, 'payment') and self.payment and self.payment.payment_method:
+            return self.payment.get_payment_method_display()
+        return "Cash on Delivery" if self.payment_status == 'Pending' else "Online Payment"
+
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
-    product = models.ForeignKey(Product, on_delete=models.PROTECT)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='order_items')
     quantity = models.PositiveIntegerField()
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
-        return f"{self.quantity}x {self.product.product_name} in {self.order.order_reference}"
+        prod_name = self.product.product_name if self.product else "Deleted Product"
+        return f"{self.quantity}x {prod_name} in {self.order.order_reference}"
 
 
 class Payment(models.Model):
@@ -236,6 +304,13 @@ class Review(models.Model):
 
     def __str__(self):
         return f"Review by {self.user.email} on {self.product.product_name} ({self.rating}/5)"
+
+    @property
+    def is_verified_purchase(self):
+        """Check if the review is linked to a genuine completed purchase by the author."""
+        if not self.user_id or not self.product_id:
+            return False
+        return self.user.has_purchased_product(self.product)
 
 
 class Wishlist(models.Model):

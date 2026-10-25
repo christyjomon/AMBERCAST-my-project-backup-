@@ -18,16 +18,24 @@
     </div>
 
     <!-- Update Form -->
-    <form method="POST" class="space-y-space-md">
+    <form method="POST" id="profile-form" novalidate class="space-y-space-md">
       {% csrf_token %}
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
         <div>
-          <label class="block font-label-md text-label-md uppercase text-on-surface-variant font-semibold mb-1">First Name</label>
-          <input type="text" name="first_name" value="{{ user.first_name }}" class="w-full bg-surface-container-low text-on-surface p-2.5 rounded font-body-md border border-surface-container-high focus:outline-none focus:ring-1 focus:ring-primary">
+          <label class="block font-label-md text-label-md uppercase text-on-surface-variant font-semibold mb-1" for="{{ profile_form.first_name.id_for_label }}">First Name *</label>
+          {{ profile_form.first_name }}
+          <p class="field-error text-error text-xs mt-1 font-body-sm hidden" id="error-first_name"></p>
+          {% if profile_form.first_name.errors %}
+            <p class="text-error text-xs mt-1 font-body-sm">{{ profile_form.first_name.errors.0 }}</p>
+          {% endif %}
         </div>
         <div>
-          <label class="block font-label-md text-label-md uppercase text-on-surface-variant font-semibold mb-1">Last Name</label>
-          <input type="text" name="last_name" value="{{ user.last_name }}" class="w-full bg-surface-container-low text-on-surface p-2.5 rounded font-body-md border border-surface-container-high focus:outline-none focus:ring-1 focus:ring-primary">
+          <label class="block font-label-md text-label-md uppercase text-on-surface-variant font-semibold mb-1" for="{{ profile_form.last_name.id_for_label }}">Last Name *</label>
+          {{ profile_form.last_name }}
+          <p class="field-error text-error text-xs mt-1 font-body-sm hidden" id="error-last_name"></p>
+          {% if profile_form.last_name.errors %}
+            <p class="text-error text-xs mt-1 font-body-sm">{{ profile_form.last_name.errors.0 }}</p>
+          {% endif %}
         </div>
       </div>
 
@@ -37,14 +45,32 @@
           <input type="email" value="{{ user.email }}" disabled class="w-full bg-surface-container text-outline p-2.5 rounded font-body-md border border-surface-container-high cursor-not-allowed">
         </div>
         <div>
-          <label class="block font-label-md text-label-md uppercase text-on-surface-variant font-semibold mb-1">Contact Telephone</label>
-          <input type="text" name="phone" value="{{ user.phone|default:'' }}" class="w-full bg-surface-container-low text-on-surface p-2.5 rounded font-body-md border border-surface-container-high focus:outline-none focus:ring-1 focus:ring-primary">
+          <label class="block font-label-md text-label-md uppercase text-on-surface-variant font-semibold mb-1" for="{{ profile_form.phone.id_for_label }}">Contact Telephone (10 Digits) *</label>
+          {{ profile_form.phone }}
+          <p class="field-error text-error text-xs mt-1 font-body-sm hidden" id="error-phone"></p>
+          {% if profile_form.phone.errors %}
+            <p class="text-error text-xs mt-1 font-body-sm">{{ profile_form.phone.errors.0 }}</p>
+          {% endif %}
         </div>
       </div>
 
-      <div>
-        <label class="block font-label-md text-label-md uppercase text-on-surface-variant font-semibold mb-1">Delivery Address</label>
-        <textarea name="address" rows="3" class="w-full bg-surface-container-low text-on-surface p-2.5 rounded font-body-md border border-surface-container-high focus:outline-none focus:ring-1 focus:ring-primary resize-none">{{ user.address|default:'' }}</textarea>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-space-md">
+        <div class="sm:col-span-2">
+          <label class="block font-label-md text-label-md uppercase text-on-surface-variant font-semibold mb-1" for="{{ profile_form.address.id_for_label }}">Delivery Address *</label>
+          {{ profile_form.address }}
+          <p class="field-error text-error text-xs mt-1 font-body-sm hidden" id="error-address"></p>
+          {% if profile_form.address.errors %}
+            <p class="text-error text-xs mt-1 font-body-sm">{{ profile_form.address.errors.0 }}</p>
+          {% endif %}
+        </div>
+        <div>
+          <label class="block font-label-md text-label-md uppercase text-on-surface-variant font-semibold mb-1" for="{{ profile_form.pincode.id_for_label }}">PIN Code (6 Digits)</label>
+          {{ profile_form.pincode }}
+          <p class="field-error text-error text-xs mt-1 font-body-sm hidden" id="error-pincode"></p>
+          {% if profile_form.pincode.errors %}
+            <p class="text-error text-xs mt-1 font-body-sm">{{ profile_form.pincode.errors.0 }}</p>
+          {% endif %}
+        </div>
       </div>
 
       <div class="flex justify-end">
@@ -80,4 +106,91 @@
     </div>
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('profile-form');
+  if (!form) return;
+
+  function showError(fieldId, message) {
+    const errEl = document.getElementById('error-' + fieldId);
+    if (errEl) {
+      errEl.textContent = message;
+      errEl.classList.remove('hidden');
+    }
+  }
+
+  function clearErrors() {
+    document.querySelectorAll('.field-error').forEach(el => {
+      el.textContent = '';
+      el.classList.add('hidden');
+    });
+  }
+
+  form.addEventListener('submit', function(e) {
+    clearErrors();
+    let isValid = true;
+
+    // First Name
+    const firstNameInput = document.getElementById('{{ profile_form.first_name.id_for_label }}');
+    if (firstNameInput) {
+      firstNameInput.value = firstNameInput.value.trim();
+      if (!firstNameInput.value) {
+        showError('first_name', 'First name is required and cannot be empty.');
+        isValid = false;
+      } else if (!/^[A-Za-z ]+$/.test(firstNameInput.value)) {
+        showError('first_name', 'First name can only contain alphabets and spaces.');
+        isValid = false;
+      }
+    }
+
+    // Last Name
+    const lastNameInput = document.getElementById('{{ profile_form.last_name.id_for_label }}');
+    if (lastNameInput) {
+      lastNameInput.value = lastNameInput.value.trim();
+      if (!lastNameInput.value) {
+        showError('last_name', 'Last name is required and cannot be empty.');
+        isValid = false;
+      } else if (!/^[A-Za-z ]+$/.test(lastNameInput.value)) {
+        showError('last_name', 'Last name can only contain alphabets and spaces.');
+        isValid = false;
+      }
+    }
+
+    // Phone
+    const phoneInput = document.getElementById('{{ profile_form.phone.id_for_label }}');
+    if (phoneInput) {
+      phoneInput.value = phoneInput.value.trim();
+      if (phoneInput.value && !/^\d{10}$/.test(phoneInput.value)) {
+        showError('phone', 'Mobile number must be exactly 10 digits.');
+        isValid = false;
+      }
+    }
+
+    // PIN Code
+    const pincodeInput = document.getElementById('{{ profile_form.pincode.id_for_label }}');
+    if (pincodeInput && pincodeInput.value) {
+      pincodeInput.value = pincodeInput.value.trim();
+      if (pincodeInput.value && !/^\d{6}$/.test(pincodeInput.value)) {
+        showError('pincode', 'PIN code must be exactly 6 digits.');
+        isValid = false;
+      }
+    }
+
+    // Address
+    const addressInput = document.getElementById('{{ profile_form.address.id_for_label }}');
+    if (addressInput) {
+      addressInput.value = addressInput.value.trim();
+      if (!addressInput.value) {
+        showError('address', 'Delivery address is required and cannot be empty.');
+        isValid = false;
+      }
+    }
+
+    if (!isValid) {
+      e.preventDefault();
+    }
+  });
+});
+</script>
 {% endblock %}

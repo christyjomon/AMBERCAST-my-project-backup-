@@ -78,11 +78,11 @@
 
                   <!-- Counter -->
                   <div class="flex items-center bg-surface-container-lowest rounded-full p-1 shadow-sm border border-surface-container-high">
-                    <button type="button" aria-label="Decrease quantity" class="qty-btn w-7 h-7 rounded-full bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-on-surface transition-colors focus:outline-none" data-id="{{ item.id }}" data-delta="-1">
+                    <button type="button" aria-label="Decrease quantity" class="qty-btn w-7 h-7 rounded-full bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-on-surface transition-colors focus:outline-none" data-id="{{ item.id }}" data-delta="-1" data-stock="{{ item.product.stock_quantity }}">
                       <span class="material-symbols-outlined text-sm">remove</span>
                     </button>
                     <span class="w-8 text-center font-label-md text-label-md font-semibold text-on-surface" id="qty-val-{{ item.id }}">{{ item.quantity }}</span>
-                    <button type="button" aria-label="Increase quantity" class="qty-btn w-7 h-7 rounded-full bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-on-surface transition-colors focus:outline-none" data-id="{{ item.id }}" data-delta="1">
+                    <button type="button" aria-label="Increase quantity" class="qty-btn w-7 h-7 rounded-full bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-on-surface transition-colors focus:outline-none" data-id="{{ item.id }}" data-delta="1" data-stock="{{ item.product.stock_quantity }}">
                       <span class="material-symbols-outlined text-sm">add</span>
                     </button>
                   </div>
@@ -139,62 +139,73 @@
               <span class="material-symbols-outlined text-primary text-2xl">local_shipping</span>
             </div>
 
-            <!-- Saved Addresses Selector -->
+            <!-- Delivery Coordinates Selector -->
             <div class="flex flex-col gap-2">
-              <label class="font-label-md text-label-md text-on-surface-variant uppercase font-semibold">Quick-Select Stored Dossier Address</label>
+              <label class="font-label-md text-label-md text-on-surface-variant uppercase font-semibold">Delivery Coordinates Selector</label>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
-                <!-- Address Card 1 (Active) -->
+                <!-- Address Option 1 (Account Profile) -->
                 <label class="relative flex flex-col p-space-md rounded-lg bg-surface-container-low cursor-pointer hover:bg-surface-container transition-all border border-surface-container-high">
-                  <input checked class="sr-only peer" name="saved_address" onchange="populateSavedAddress('primary')" type="radio" value="primary">
+                  <input checked class="sr-only peer" name="delivery_preset" onchange="selectDeliveryPreset('account')" type="radio" value="account">
                   <div class="flex items-center justify-between">
-                    <span class="font-label-sm text-label-sm uppercase bg-primary text-on-primary px-2 py-0.5 rounded-full font-semibold">Primary Residence</span>
+                    <span class="font-label-sm text-label-sm uppercase bg-primary text-on-primary px-2 py-0.5 rounded-full font-semibold">Account Profile Address</span>
                     <span class="material-symbols-outlined text-primary opacity-0 peer-checked:opacity-100 transition-opacity">check_circle</span>
                   </div>
-                  <div class="mt-2 font-body-md text-body-md text-on-surface font-semibold">{{ user.first_name|default:"Devraj" }} {{ user.last_name|default:"Sengupta" }}</div>
+                  <div class="mt-2 font-body-md text-body-md text-on-surface font-semibold">{% if user.is_authenticated and user.first_name %}{{ user.first_name }} {{ user.last_name }}{% elif user.is_authenticated %}{{ user.email }}{% else %}Guest Patron{% endif %}</div>
                   <div class="font-body-sm text-body-sm text-on-surface-variant mt-0.5 leading-snug">
-                    {{ user.address|default:"42/A Heritage Estate, Malabar Hill, Mumbai, MH 400006, India" }}
+                    {% if user.address %}{{ user.address }}{% else %}<span class="text-outline italic">No address saved in profile yet. Enter details below to save.</span>{% endif %}
                   </div>
-                  <div class="font-label-sm text-label-sm text-primary mt-2 font-mono">{{ user.phone|default:"+91 98201 44921" }}</div>
+                  <div class="font-label-sm text-label-sm text-primary mt-2 font-mono">
+                    {% if user.phone %}+91 {{ user.phone }}{% else %}<span class="text-outline italic text-xs font-sans">No phone saved yet</span>{% endif %}
+                  </div>
                   <div class="absolute inset-0 rounded-lg pointer-events-none peer-checked:ring-2 peer-checked:ring-primary/40"></div>
                 </label>
 
-                <!-- Address Card 2 -->
+                <!-- Address Option 2 (Alternate Destination) -->
                 <label class="relative flex flex-col p-space-md rounded-lg bg-surface-container-low cursor-pointer hover:bg-surface-container transition-all border border-surface-container-high">
-                  <input class="sr-only peer" name="saved_address" onchange="populateSavedAddress('atelier')" type="radio" value="atelier">
+                  <input class="sr-only peer" name="delivery_preset" onchange="selectDeliveryPreset('alternate')" type="radio" value="alternate">
                   <div class="flex items-center justify-between">
-                    <span class="font-label-sm text-label-sm uppercase bg-surface-container-highest text-on-surface-variant px-2 py-0.5 rounded-full font-semibold">Design Studio</span>
+                    <span class="font-label-sm text-label-sm uppercase bg-surface-container-highest text-on-surface-variant px-2 py-0.5 rounded-full font-semibold">Alternate Address</span>
                     <span class="material-symbols-outlined text-primary opacity-0 peer-checked:opacity-100 transition-opacity">check_circle</span>
                   </div>
-                  <div class="mt-2 font-body-md text-body-md text-on-surface font-semibold">{{ user.first_name|default:"Devraj" }} {{ user.last_name|default:"Sengupta" }}</div>
+                  <div class="mt-2 font-body-md text-body-md text-on-surface font-semibold">Alternate Delivery Location</div>
                   <div class="font-body-sm text-body-sm text-on-surface-variant mt-0.5 leading-snug">
-                    Penthouse 7, The Oberoi Chambers, Nariman Point, Mumbai 400021, India
+                    Ship to an alternate office, residence, or recipient for this order.
                   </div>
-                  <div class="font-label-sm text-label-sm text-primary mt-2 font-mono">+91 98201 88910</div>
+                  <div class="font-label-sm text-label-sm text-secondary mt-2 font-mono">Custom address fields below</div>
                   <div class="absolute inset-0 rounded-lg pointer-events-none peer-checked:ring-2 peer-checked:ring-primary/40"></div>
                 </label>
               </div>
             </div>
 
-            <!-- Explicit Form: first_name, last_name, phone, shipping_address, delivery_notes -->
+            <!-- Explicit Form: first_name, last_name, phone, pincode, shipping_address, delivery_notes -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md pt-2">
               <div class="flex flex-col gap-1">
                 <label class="font-label-md text-label-md uppercase text-on-surface-variant font-semibold" for="first_name">First Name *</label>
-                <input class="w-full bg-surface-container-low focus:bg-surface-container-lowest text-on-surface px-space-md py-space-sm rounded font-body-md text-body-md outline-none transition-all shadow-sm border border-surface-container-high focus:border-primary" id="first_name" name="first_name" required type="text" value="{{ user.first_name|default:'Devraj' }}">
+                <input class="w-full bg-surface-container-low focus:bg-surface-container-lowest text-on-surface px-space-md py-space-sm rounded font-body-md text-body-md outline-none transition-all shadow-sm border border-surface-container-high focus:border-primary" id="first_name" name="first_name" required pattern="^[A-Za-z ]+$" title="Alphabets and spaces only" type="text" value="{{ user.first_name|default:'' }}">
+                <p class="field-error text-error text-xs mt-1 font-body-sm hidden" id="error-first_name"></p>
               </div>
               <div class="flex flex-col gap-1">
                 <label class="font-label-md text-label-md uppercase text-on-surface-variant font-semibold" for="last_name">Last Name *</label>
-                <input class="w-full bg-surface-container-low focus:bg-surface-container-lowest text-on-surface px-space-md py-space-sm rounded font-body-md text-body-md outline-none transition-all shadow-sm border border-surface-container-high focus:border-primary" id="last_name" name="last_name" required type="text" value="{{ user.last_name|default:'Sengupta' }}">
+                <input class="w-full bg-surface-container-low focus:bg-surface-container-lowest text-on-surface px-space-md py-space-sm rounded font-body-md text-body-md outline-none transition-all shadow-sm border border-surface-container-high focus:border-primary" id="last_name" name="last_name" required pattern="^[A-Za-z ]+$" title="Alphabets and spaces only" type="text" value="{{ user.last_name|default:'' }}">
+                <p class="field-error text-error text-xs mt-1 font-body-sm hidden" id="error-last_name"></p>
               </div>
-              <div class="flex flex-col gap-1 sm:col-span-2">
-                <label class="font-label-md text-label-md uppercase text-on-surface-variant font-semibold" for="phone">Contact Telephone (Dispatch SMS &amp; Verification) *</label>
+              <div class="flex flex-col gap-1">
+                <label class="font-label-md text-label-md uppercase text-on-surface-variant font-semibold" for="phone">Contact Telephone (10 Digits) *</label>
                 <div class="relative flex items-center">
                   <span class="absolute left-space-md font-label-md text-label-md text-on-surface-variant font-mono">+91</span>
-                  <input class="w-full pl-14 bg-surface-container-low focus:bg-surface-container-lowest text-on-surface pr-space-md py-space-sm rounded font-body-md text-body-md outline-none transition-all shadow-sm border border-surface-container-high focus:border-primary" id="phone" name="phone" required type="tel" value="{{ user.phone|default:'98201 44921' }}">
+                  <input class="w-full pl-14 bg-surface-container-low focus:bg-surface-container-lowest text-on-surface pr-space-md py-space-sm rounded font-body-md text-body-md outline-none transition-all shadow-sm border border-surface-container-high focus:border-primary" id="phone" name="phone" required pattern="^[0-9]{10}$" maxlength="10" minlength="10" placeholder="9876543210" title="Contact number must be exactly 10 digits" type="tel" value="{{ user.phone|default:'' }}">
                 </div>
+                <p class="field-error text-error text-xs mt-1 font-body-sm hidden" id="error-phone"></p>
+              </div>
+              <div class="flex flex-col gap-1">
+                <label class="font-label-md text-label-md uppercase text-on-surface-variant font-semibold" for="pincode">PIN Code (6 Digits Pan-India) *</label>
+                <input class="w-full bg-surface-container-low focus:bg-surface-container-lowest text-on-surface px-space-md py-space-sm rounded font-body-md text-body-md outline-none transition-all shadow-sm border border-surface-container-high focus:border-primary" id="pincode" name="pincode" required pattern="^[0-9]{6}$" maxlength="6" minlength="6" placeholder="e.g. 682001" title="PIN code must be exactly 6 digits" type="text" value="{{ user_pincode|default:'' }}">
+                <p class="field-error text-error text-xs mt-1 font-body-sm hidden" id="error-pincode"></p>
               </div>
               <div class="flex flex-col gap-1 sm:col-span-2">
                 <label class="font-label-md text-label-md uppercase text-on-surface-variant font-semibold" for="shipping_address">Artisan Courier Delivery Address *</label>
-                <textarea class="w-full bg-surface-container-low focus:bg-surface-container-lowest text-on-surface p-space-md rounded font-body-md text-body-md outline-none transition-all shadow-sm border border-surface-container-high focus:border-primary resize-none" id="shipping_address" name="shipping_address" required rows="3">{{ user.address|default:'42/A Heritage Estate, Malabar Hill, Mumbai, MH 400006, India' }}</textarea>
+                <textarea class="w-full bg-surface-container-low focus:bg-surface-container-lowest text-on-surface p-space-md rounded font-body-md text-body-md outline-none transition-all shadow-sm border border-surface-container-high focus:border-primary resize-none" id="shipping_address" name="shipping_address" required rows="3" placeholder="Enter delivery address street, building, locality, city, state">{{ user.address|default:'' }}</textarea>
+                <p class="field-error text-error text-xs mt-1 font-body-sm hidden" id="error-shipping_address"></p>
               </div>
               <div class="flex flex-col gap-1 sm:col-span-2">
                 <label class="font-label-md text-label-md uppercase text-on-surface-variant font-semibold" for="delivery_notes">Foundry Handling Directives (Optional)</label>
@@ -446,26 +457,58 @@
     }
   }
 
-  function populateSavedAddress(profile) {
+  const accountProfileData = {
+    firstName: "{{ user.first_name|default:''|escapejs }}",
+    lastName: "{{ user.last_name|default:''|escapejs }}",
+    phone: "{{ user.phone|default:''|escapejs }}",
+    address: "{{ user.address|default:''|escapejs }}",
+    pincode: "{{ user_pincode|default:''|escapejs }}"
+  };
+
+  function selectDeliveryPreset(preset) {
     const firstNameInput = document.getElementById('first_name');
     const lastNameInput = document.getElementById('last_name');
     const phoneInput = document.getElementById('phone');
     const addressInput = document.getElementById('shipping_address');
+    const pincodeInput = document.getElementById('pincode');
 
-    if (profile === 'primary') {
-      if (firstNameInput) firstNameInput.value = 'Devraj';
-      if (lastNameInput) lastNameInput.value = 'Sengupta';
-      if (phoneInput) phoneInput.value = '98201 44921';
-      if (addressInput) addressInput.value = '42/A Heritage Estate, Malabar Hill, Mumbai, MH 400006, India';
-    } else if (profile === 'atelier') {
-      if (firstNameInput) firstNameInput.value = 'Devraj';
-      if (lastNameInput) lastNameInput.value = 'Sengupta';
-      if (phoneInput) phoneInput.value = '98201 88910';
-      if (addressInput) addressInput.value = 'Penthouse 7, The Oberoi Chambers, Nariman Point, Mumbai 400021, India';
+    if (preset === 'account') {
+      if (firstNameInput && accountProfileData.firstName) firstNameInput.value = accountProfileData.firstName;
+      if (lastNameInput && accountProfileData.lastName) lastNameInput.value = accountProfileData.lastName;
+      if (phoneInput && accountProfileData.phone) phoneInput.value = accountProfileData.phone;
+      if (addressInput && accountProfileData.address) addressInput.value = accountProfileData.address;
+      if (pincodeInput && accountProfileData.pincode) pincodeInput.value = accountProfileData.pincode;
+    } else if (preset === 'alternate') {
+      if (addressInput) {
+        addressInput.value = '';
+        addressInput.placeholder = 'Enter alternate delivery address street, building, city, state';
+        addressInput.focus();
+      }
+      if (pincodeInput) {
+        pincodeInput.value = '';
+      }
     }
   }
 
   function updateItemQuantity(itemId, delta) {
+    const qtyEl = document.getElementById(`qty-val-${itemId}`);
+    const currentQty = qtyEl ? parseInt(qtyEl.innerText.trim(), 10) : 1;
+    const targetQty = currentQty + delta;
+
+    if (targetQty <= 0) {
+      alert('Quantity cannot be zero or negative. Minimum quantity is 1. To remove this artifact from your curation, click the delete button.');
+      return;
+    }
+
+    const btn = document.querySelector(`.qty-btn[data-id="${itemId}"][data-delta="${delta}"]`);
+    if (btn && btn.dataset.stock) {
+      const stock = parseInt(btn.dataset.stock, 10);
+      if (targetQty > stock) {
+        alert(`Cannot add more items. Only ${stock} units are currently available in foundry inventory.`);
+        return;
+      }
+    }
+
     const formData = new FormData();
     formData.append('delta', delta);
     formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
@@ -480,7 +523,6 @@
     .then(r => r.json())
     .then(data => {
       if (data.status === 'success') {
-        const qtyEl = document.getElementById(`qty-val-${itemId}`);
         const subEl = document.getElementById(`subtotal-val-${itemId}`);
         const rowEl = document.getElementById(`cart-item-row-${itemId}`);
 
@@ -517,7 +559,12 @@
             btn.classList.add('opacity-50', 'cursor-not-allowed');
           }
         }
+      } else if (data.status === 'error') {
+        alert(data.message || 'Unable to update item quantity.');
       }
+    })
+    .catch(() => {
+      alert('Network error while updating quantity. Please try again.');
     });
   }
 
@@ -542,7 +589,6 @@
     }
   }
 
-
   document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.qty-btn').forEach(btn => {
       btn.addEventListener('click', function() {
@@ -551,6 +597,93 @@
         updateItemQuantity(itemId, delta);
       });
     });
+
+    const checkoutForm = document.getElementById('checkout-form');
+    if (checkoutForm) {
+      function showCheckoutError(fieldId, msg) {
+        const el = document.getElementById('error-' + fieldId);
+        if (el) {
+          el.textContent = msg;
+          el.classList.remove('hidden');
+        }
+      }
+      function clearCheckoutErrors() {
+        checkoutForm.querySelectorAll('.field-error').forEach(el => {
+          el.textContent = '';
+          el.classList.add('hidden');
+        });
+      }
+
+      checkoutForm.addEventListener('submit', function(e) {
+        clearCheckoutErrors();
+        let valid = true;
+
+        const fn = document.getElementById('first_name');
+        if (fn) {
+          fn.value = fn.value.trim();
+          if (!fn.value) {
+            showCheckoutError('first_name', 'First name is required.');
+            valid = false;
+          } else if (!/^[A-Za-z ]+$/.test(fn.value)) {
+            showCheckoutError('first_name', 'First name must contain only alphabets and spaces.');
+            valid = false;
+          }
+        }
+
+        const ln = document.getElementById('last_name');
+        if (ln) {
+          ln.value = ln.value.trim();
+          if (!ln.value) {
+            showCheckoutError('last_name', 'Last name is required.');
+            valid = false;
+          } else if (!/^[A-Za-z ]+$/.test(ln.value)) {
+            showCheckoutError('last_name', 'Last name must contain only alphabets and spaces.');
+            valid = false;
+          }
+        }
+
+        const ph = document.getElementById('phone');
+        if (ph) {
+          ph.value = ph.value.trim();
+          if (!ph.value) {
+            showCheckoutError('phone', 'Mobile telephone number is required.');
+            valid = false;
+          } else if (!/^\d{10}$/.test(ph.value)) {
+            showCheckoutError('phone', 'Mobile number must be exactly 10 digits.');
+            valid = false;
+          }
+        }
+
+        const pin = document.getElementById('pincode');
+        if (pin) {
+          pin.value = pin.value.trim();
+          if (!pin.value) {
+            showCheckoutError('pincode', 'PIN code is required.');
+            valid = false;
+          } else if (!/^\d{6}$/.test(pin.value)) {
+            showCheckoutError('pincode', 'PIN code must be exactly 6 digits.');
+            valid = false;
+          }
+        }
+
+        const addr = document.getElementById('shipping_address');
+        if (addr) {
+          addr.value = addr.value.trim();
+          if (!addr.value) {
+            showCheckoutError('shipping_address', 'Delivery address is required.');
+            valid = false;
+          }
+        }
+
+        if (!valid) {
+          e.preventDefault();
+          const firstErr = checkoutForm.querySelector('.field-error:not(.hidden)');
+          if (firstErr) {
+            firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }
+      });
+    }
   });
 </script>
 {% endblock %}

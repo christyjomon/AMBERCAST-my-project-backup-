@@ -25,6 +25,8 @@ urlpatterns = [
     # Orders & Heritage & Reviews
     path('orders/', views.order_list, name='orders'),
     path('orders/<int:order_id>/', views.order_detail, name='order_detail'),
+    path('orders/<int:order_id>/invoice/', views.order_invoice, name='order_invoice'),
+    path('orders/<int:order_id>/cancel/', views.cancel_order, name='cancel_order'),
     path('heritage/', views.heritage_story, name='heritage_story'),
     path('reviews/', views.reviews_view, name='reviews'),
     
@@ -38,8 +40,14 @@ urlpatterns = [
     path('atelier/', views.atelier_dashboard, name='atelier_dashboard'),
     path('atelier/restock/<int:pk>/', views.atelier_quick_restock, name='atelier_quick_restock'),
     path('atelier/order-status/<int:order_id>/', views.atelier_update_order_status, name='atelier_update_order_status'),
+    path('atelier/order-payment/<int:order_id>/', views.atelier_update_payment_status, name='atelier_update_payment_status'),
     path('atelier/add-product/', views.atelier_add_product, name='atelier_add_product'),
+    path('atelier/products/edit/<int:pk>/', views.atelier_edit_product, name='atelier_edit_product'),
+    path('atelier/products/delete/<int:pk>/', views.atelier_delete_product, name='atelier_delete_product'),
     path('atelier/orders/', views.atelier_orders, name='atelier_orders'),
     path('atelier/products/', views.atelier_products, name='atelier_products'),
+    path('atelier/users/', views.atelier_users, name='atelier_users'),
+    path('atelier/users/edit/<int:pk>/', views.atelier_edit_user, name='atelier_edit_user'),
+    path('atelier/users/delete/<int:pk>/', views.atelier_delete_user, name='atelier_delete_user'),
     path('atelier/analytics/', views.atelier_analytics, name='atelier_analytics'),
 ]
